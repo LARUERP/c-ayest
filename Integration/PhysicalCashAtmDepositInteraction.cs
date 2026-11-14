@@ -325,7 +325,19 @@ namespace FusionDarkRP.Integration
                 }
 
                 foreach (string key in completed)
-                    Requests.Remove(key);
+                {
+                    if (result.Success)
+                    {
+                        Requests.Remove(key);
+                    }
+                    else
+                    {
+                        // Refus : on attend ~8 s avant de réessayer au lieu
+                        // de renvoyer une demande toutes les 0,12 s.
+                        Requests[key] =
+                            Time.realtimeSinceStartup + 6f;
+                    }
+                }
             }
 
             if (result.Success)

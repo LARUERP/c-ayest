@@ -439,6 +439,8 @@ namespace FusionDarkRP.Integration
         };
 
         private static int withdrawIndex = 1;
+        private const float WithdrawHoldSeconds = 0.7f;
+        private static float triggerHeldSince = -1f;
         private static Text hintText;
         private static bool spawnResultHooked;
         private static float nextSpawnAllowed;
@@ -582,19 +584,31 @@ namespace FusionDarkRP.Integration
 
             bool near =
                 Vector3.Distance(palm.position, root.transform.position)
-                < 0.18f;
+                < 0.13f;
 
             if (hintText != null)
             {
+                string hold =
+                    near && triggerHeldSince >= 0f
+                        ? "  |  " + Mathf.Clamp(
+                            (int)((Time.unscaledTime - triggerHeldSince)
+                                / WithdrawHoldSeconds * 100f), 0, 100)
+                            + " %"
+                        : "";
+
                 hintText.text =
                     near
                         ? WithdrawLabels[withdrawIndex]
-                          + "  |  A : changer  |  Gâchette : sortir  |  B : ranger"
+                          + "  |  A : changer  |  Gâchette maintenue : sortir  |  B : ranger"
+                          + hold
                         : "Main droite près du poignet : sortir billets et pièces";
             }
 
             if (!near)
+            {
+                triggerHeldSince = -1f;
                 return;
+            }
 
             if (controller.GetAButtonDown())
             {
@@ -602,9 +616,21 @@ namespace FusionDarkRP.Integration
                     (withdrawIndex + 1) % WithdrawItems.Length;
             }
 
-            if (controller.GetPrimaryInteractionButtonDown() &&
+            // Sortie volontaire : gâchette maintenue ~0,7 s près du poignet,
+            // pour ne plus sortir d'argent par accident en attrapant un objet.
+            if (!controller.GetPrimaryInteractionButton())
+            {
+                triggerHeldSince = -1f;
+                return;
+            }
+
+            if (triggerHeldSince < 0f)
+                triggerHeldSince = Time.unscaledTime;
+
+            if (Time.unscaledTime - triggerHeldSince >= WithdrawHoldSeconds &&
                 Time.unscaledTime >= nextSpawnAllowed)
             {
+                triggerHeldSince = -1f;
                 nextSpawnAllowed = Time.unscaledTime + 1.2f;
 
                 if (!PhysicalCashSpawnNetwork.RequestSpawn(

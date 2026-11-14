@@ -40,3 +40,10 @@
 - Retrait au distributeur : la distance au distributeur était mesurée depuis ce même point de départ (toujours "trop loin") ; corrigé par le même changement.
 - Personnage poussé quand un objet est rangé au holster : le collider ajouté par le mod était sur le calque par défaut et entrait en collision avec le corps physique du joueur. Le visuel prend maintenant le calque des colliders d'origine de l'arme (CarrierVisualAdapter.MatchLayerToWeapon), pour les objets porteurs et la carte.
 - Diagnostic des refus carte au distributeur : le journal indique désormais la raison exacte (carte absente du registre, révoquée, propriétaire différent, requête trop rapprochée).
+
+# 3.8.0 (non compilé ici — aucun SDK .NET dans le bac à sable ; corrections tirées du journal 26-11-14_19-4-30)
+- Rangement des billets ("Billet trop éloigné") et dépôt ATM ("Vous êtes trop loin du distributeur") : le point de référence "avant-bras" était l'objet PhysicsRig, resté au point de départ du niveau. PhysicalCashRigAnchorResolver.Resolve utilise maintenant la tête du joueur pour toutes les vérifications de distance.
+- Dépôt ATM : après un refus, la demande n'est plus renvoyée toutes les 0,12 s (≈ 8 s d'attente) ; fin de la rafale de "Patientez avant un nouveau dépôt".
+- Écran du distributeur : le bouton EJECTER MA CARTE était exactement superposé au bouton RETIRER 100 EUR (impossible de reprendre la carte). Mise en page refaite sans chevauchement.
+- Carte insérée : remise droite (face parallèle à la plaque du lecteur, grand côté horizontal) et plaquée à 6 mm devant la plaque.
+- Portefeuille : la sortie d'espèces demande maintenant de maintenir la gâchette ~0,7 s (avec pourcentage affiché), zone réduite à 13 cm ; plus de billets sortis par accident.

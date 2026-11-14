@@ -417,14 +417,31 @@ namespace FusionDarkRP.Integration
                         // Déjà lâchée : sans importance.
                     }
 
-                    Vector3 center =
-                        body.transform.TransformPoint(CardSlotLocalPosition);
-
                     lockedHost = host;
                     lockedBody = host.Rb;
                     lockedWasKinematic = lockedBody.isKinematic;
 
                     lockedBody.isKinematic = true;
+
+                    // 1) Carte remise droite : face parallèle à la plaque du
+                    //    lecteur, grand côté à l'horizontale, haut vers le haut.
+                    Quaternion wanted = body.transform.rotation;
+
+                    Quaternion correction =
+                        wanted *
+                        Quaternion.Inverse(
+                            cardCollider.transform.rotation);
+
+                    host.transform.rotation =
+                        correction * host.transform.rotation;
+
+                    Physics.SyncTransforms();
+
+                    // 2) Carte plaquée contre la plaque, centrée sur la fente.
+                    Vector3 center =
+                        body.transform.TransformPoint(
+                            CardSlotLocalPosition
+                            + CardInsertedOffset);
 
                     host.transform.position +=
                         center - cardCollider.bounds.center;
@@ -910,97 +927,62 @@ namespace FusionDarkRP.Integration
                 );
 
                 Button(
-                    "RETIRER 10 EUR",
-                    110f,
-                    -75f,
-                    215f,
-                    75f,
-                    () => RequestOperation(
-                        BankOperationType.Withdraw,
-                        1000
-                    ),
-                    withdrawColor
-                );
-
-                Button(
-                    "RETIRER 50 EUR",
-                    110f,
-                    -170f,
-                    215f,
-                    75f,
-                    () => RequestOperation(
-                        BankOperationType.Withdraw,
-                        5000
-                    ),
-                    withdrawColor
-                );
-
-                Button(
-                    "RETIRER 100 EUR",
-                    0f,
-                    -265f,
-                    440f,
-                    75f,
-                    () => RequestOperation(
-                        BankOperationType.Withdraw,
-                        10000
-                    ),
-                    withdrawColor
-                );
-
-                Button(
                     "RETIRER 5 EUR",
-                    -110f,
-                    -75f,
-                    215f,
-                    75f,
+                    -110f, -70f, 215f, 70f,
                     () => RequestOperation(
-                        BankOperationType.Withdraw,
-                        500
-                    ),
+                        BankOperationType.Withdraw, 500),
+                    withdrawColor
+                );
+
+                Button(
+                    "RETIRER 10 EUR",
+                    110f, -70f, 215f, 70f,
+                    () => RequestOperation(
+                        BankOperationType.Withdraw, 1000),
                     withdrawColor
                 );
 
                 Button(
                     "RETIRER 20 EUR",
-                    -110f,
-                    -170f,
-                    215f,
-                    75f,
+                    -110f, -155f, 215f, 70f,
                     () => RequestOperation(
-                        BankOperationType.Withdraw,
-                        2000
-                    ),
+                        BankOperationType.Withdraw, 2000),
+                    withdrawColor
+                );
+
+                Button(
+                    "RETIRER 50 EUR",
+                    110f, -155f, 215f, 70f,
+                    () => RequestOperation(
+                        BankOperationType.Withdraw, 5000),
+                    withdrawColor
+                );
+
+                Button(
+                    "RETIRER 100 EUR",
+                    0f, -240f, 440f, 70f,
+                    () => RequestOperation(
+                        BankOperationType.Withdraw, 10000),
                     withdrawColor
                 );
 
                 Button(
                     "EJECTER MA CARTE",
-                    0f,
-                    -265f,
-                    520f,
-                    75f,
+                    0f, -325f, 520f, 70f,
                     EjectCard,
                     new Color(0.5f, 0.18f, 0.18f)
                 );
 
                 Button(
                     "ACTUALISER MON COMPTE",
-                    0f,
-                    -370f,
-                    520f,
-                    75f,
+                    0f, -410f, 520f, 70f,
                     RequestBalances,
                     new Color(0.12f, 0.3f, 0.48f)
                 );
 
                 Label(
-                    "Appuyez sur EJECTER pour reprendre votre carte.",
-                    0f,
-                    -455f,
-                    520f,
-                    40f,
-                    18f,
+                    "EJECTER pour reprendre votre carte.",
+                    0f, -478f, 520f, 36f, 17f,
                     new Color(0.75f, 0.8f, 0.9f)
                 );
 

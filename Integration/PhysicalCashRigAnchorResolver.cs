@@ -12,8 +12,19 @@ namespace FusionDarkRP.Integration
     /// </summary>
     public static class PhysicalCashRigAnchorResolver
     {
+        /// <summary>
+        /// Point de référence pour toutes les vérifications de distance
+        /// (distributeur, billet à ranger). L'ancien "avant-bras" trouvé était
+        /// en réalité l'objet PhysicsRig, qui reste au point de départ du
+        /// niveau : billets "trop éloignés" et distributeur "trop loin".
+        /// </summary>
         public static Transform Resolve(PlayerID player)
         {
+            Transform body = ResolveBody(player);
+
+            if (body != null)
+                return body;
+
             Transform forearm = ResolveLeftForearm(player);
 
             if (forearm != null)
