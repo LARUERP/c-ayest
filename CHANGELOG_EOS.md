@@ -34,3 +34,9 @@
 - Carte bancaire : plus de disparition silencieuse. Si aucun holster n'est libre ou si l'insertion est refusée, la carte (toujours enregistrée en banque) est posée devant le joueur et reste saisissable ; le lecteur du distributeur la reconnaît comme avant.
 - Objets de métier : 6 modèles manquants créés (PoliceNotepad, ShopScanner, TownFolder, WorkGloves, ArmoryCatalog, BankTerminal) et déclarés au catalogue ; 18 équipements apparaissables au total, contrôle OBJ/MTL/PNG/catalogue à 0 écart.
 - Journal fourni (14/11 13:22) : il s'arrête avant le chargement des mods (erreur MelonLoader/Il2CppInterop) et ne contient aucune ligne du mod ; voir le message de livraison.
+
+# 3.7.0 (non compilé ici — aucun SDK .NET dans le bac à sable)
+- Billets/pièces apparaissaient au point de départ du niveau : le point d'apparition était la racine du RigManager (qui ne suit pas le joueur). Nouveau PhysicalCashRigAnchorResolver.ResolveBody (tête du rig physique) utilisé pour les apparitions d'argent et le repli de la carte.
+- Retrait au distributeur : la distance au distributeur était mesurée depuis ce même point de départ (toujours "trop loin") ; corrigé par le même changement.
+- Personnage poussé quand un objet est rangé au holster : le collider ajouté par le mod était sur le calque par défaut et entrait en collision avec le corps physique du joueur. Le visuel prend maintenant le calque des colliders d'origine de l'arme (CarrierVisualAdapter.MatchLayerToWeapon), pour les objets porteurs et la carte.
+- Diagnostic des refus carte au distributeur : le journal indique désormais la raison exacte (carte absente du registre, révoquée, propriétaire différent, requête trop rapprochée).

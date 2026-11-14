@@ -91,6 +91,67 @@ namespace FusionDarkRP.Integration
             return null;
         }
 
+        /// <summary>
+        /// Position réelle du joueur (tête du rig physique). La racine du
+        /// RigManager reste au point de départ du niveau dans BONELAB : s'en
+        /// servir pour faire apparaître un objet le place "au spawn".
+        /// </summary>
+        public static Transform ResolveBody(PlayerID player)
+        {
+            if (player == null || !player.IsValid)
+                return null;
+
+            if (player.IsMe)
+            {
+                try
+                {
+                    Transform head = BoneLib.Player.Head;
+
+                    if (head != null)
+                        return head;
+                }
+                catch
+                {
+                    // Repli sur le rig physique ci-dessous.
+                }
+            }
+
+            try
+            {
+                Transform root = ResolveRigRoot(player);
+
+                if (root == null)
+                    return null;
+
+                var rigManager = root.GetComponent<Il2CppSLZ.Marrow.RigManager>();
+
+                if (rigManager == null)
+                    rigManager = root.GetComponentInChildren<Il2CppSLZ.Marrow.RigManager>();
+
+                if (rigManager != null && rigManager.physicsRig != null)
+                {
+                    var head = rigManager.physicsRig.m_head;
+
+                    if (head != null && head.transform != null)
+                        return head.transform;
+
+                    var pelvis = rigManager.physicsRig.m_pelvis;
+
+                    if (pelvis != null && pelvis.transform != null)
+                        return pelvis.transform;
+                }
+            }
+            catch (Exception exception)
+            {
+                MelonLoader.MelonLogger.Warning(
+                    "[FusionDarkRP Rig] Position du corps introuvable : "
+                    + exception.Message);
+            }
+
+            // Dernier recours : la racine (position approximative).
+            return ResolveRigRoot(player);
+        }
+
         private static bool loggedMissingForearm;
         private static Transform cachedLocalRoot;
         private static Transform cachedLocalForearm;

@@ -517,9 +517,15 @@ namespace FusionDarkRP.Integration
                     0,
                     false);
 
+                string reason =
+                    cardId == null
+                        ? "identifiant de carte illisible dans la requête"
+                        : runtime.BankCards.DescribeOwnership(
+                            cardId, persistentId);
+
                 MelonLogger.Warning(
-                    "[FusionDarkRP ATM] Carte invalide ou non autorisee "
-                    + "pour " + persistentId);
+                    "[FusionDarkRP ATM] Carte refusée pour "
+                    + persistentId + " : " + reason);
 
                 return;
             }
@@ -535,6 +541,10 @@ namespace FusionDarkRP.Integration
             {
                 if (throttled && !duplicate)
                 {
+                    MelonLogger.Warning(
+                        "[FusionDarkRP ATM] Requête trop rapprochée, "
+                        + "refusée pour " + persistentId);
+
                     SendResponse(
                         sender.SmallID,
                         AtmNetworkResults.Failed,

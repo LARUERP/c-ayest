@@ -164,6 +164,44 @@ namespace FusionDarkRP.Economy
         /// Vérifie qu'une carte existe, qu'elle est active
         /// et qu'elle appartient bien au joueur demandé.
         /// </summary>
+        /// <summary>
+        /// Explique pourquoi une carte est acceptée ou refusée (diagnostic
+        /// de journal uniquement, ne modifie rien).
+        /// </summary>
+        public string DescribeOwnership(
+            string cardId,
+            string playerId)
+        {
+            if (!IsValidCardId(cardId))
+                return "identifiant de carte invalide";
+
+            lock (sync)
+            {
+                BankCardData card;
+
+                if (!cards.TryGetValue(cardId, out card) || card == null)
+                {
+                    return "carte absente du registre ("
+                        + cards.Count + " carte(s) enregistrée(s))";
+                }
+
+                if (card.Revoked)
+                    return "carte révoquée";
+
+                if (!string.Equals(
+                        card.OwnerPlayerId,
+                        playerId,
+                        StringComparison.Ordinal))
+                {
+                    return "propriétaire différent (carte : "
+                        + card.OwnerPlayerId
+                        + " | demandeur : " + playerId + ")";
+                }
+
+                return "valide";
+            }
+        }
+
         public bool IsOwnedBy(
             string cardId,
             string playerId)

@@ -365,6 +365,8 @@ namespace FusionDarkRP.Integration
                     Mathf.Max(mesh.bounds.size.y, 0.005f),
                     Mathf.Max(mesh.bounds.size.z, 0.005f));
 
+                MatchLayerToWeapon(root, visual);
+
                 visual.SetActive(true);
 
                 // Masque l'arme d'origine et tout ce qui l'accompagne,
@@ -412,6 +414,49 @@ namespace FusionDarkRP.Integration
                             UnityEngine.Object.Destroy(material);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Donne au visuel (et à son collider) le même calque physique que les
+        /// colliders d'origine de l'arme. Sur le calque par défaut, le collider
+        /// ajouté entre en collision avec le corps physique du joueur dès que
+        /// l'objet est rangé au holster : le personnage est poussé.
+        /// </summary>
+        public static void MatchLayerToWeapon(
+            GameObject root, GameObject visual)
+        {
+            if (root == null || visual == null)
+                return;
+
+            try
+            {
+                int layer = root.layer;
+                Collider[] colliders =
+                    root.GetComponentsInChildren<Collider>(true);
+
+                if (colliders != null)
+                {
+                    foreach (Collider candidate in colliders)
+                    {
+                        if (candidate == null ||
+                            candidate.isTrigger ||
+                            candidate.gameObject == visual ||
+                            candidate.transform.IsChildOf(visual.transform))
+                        {
+                            continue;
+                        }
+
+                        layer = candidate.gameObject.layer;
+                        break;
+                    }
+                }
+
+                visual.layer = layer;
+            }
+            catch
+            {
+                // Le calque d'origine du visuel est conservé en cas d'échec.
             }
         }
 

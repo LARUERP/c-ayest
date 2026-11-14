@@ -106,7 +106,7 @@ namespace FusionDarkRP.Integration
                 else
                 {
                     UnityEngine.Transform rig =
-                        PhysicalCashRigAnchorResolver.ResolveRigRoot(
+                        PhysicalCashRigAnchorResolver.ResolveBody(
                             targetPlayer);
 
                     if (rig == null)
@@ -116,10 +116,12 @@ namespace FusionDarkRP.Integration
                         return false;
                     }
 
+                    // rig = tête du joueur : la carte apparaît devant lui,
+                    // un peu sous le niveau des yeux.
                     spawnPosition =
                         rig.position
-                        + rig.forward * 0.45f
-                        + UnityEngine.Vector3.up * 1.1f;
+                        + rig.forward * 0.5f
+                        + UnityEngine.Vector3.down * 0.2f;
 
                     spawnRotation = rig.rotation;
                 }

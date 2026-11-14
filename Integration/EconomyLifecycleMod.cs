@@ -116,13 +116,13 @@ namespace FusionDarkRP.Integration
                 {
                     bool anchorReady =
                         PhysicalCashWorldManager.SetSpawnAnchorProvider(
-                            PhysicalCashRigAnchorResolver.ResolveRigRoot
+                            PhysicalCashRigAnchorResolver.ResolveBody
                         );
 
                     if (anchorReady)
                     {
                         MelonLogger.Msg(
-                            "[FusionDarkRP Cash] Racine du rig raccordée pour les apparitions physiques."
+                            "[FusionDarkRP Cash] Tête du joueur raccordée pour les apparitions physiques."
                         );
                     }
                     else

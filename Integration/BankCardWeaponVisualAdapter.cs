@@ -184,6 +184,9 @@ namespace FusionDarkRP.Integration
                         original.enabled = false;
                 }
 
+                CarrierVisualAdapter.MatchLayerToWeapon(
+                    supportRoot, visualObject);
+
                 visualObject.SetActive(true);
 
                 // Le pistolet d'origine ne doit plus jamais réapparaître.
