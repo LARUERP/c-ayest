@@ -1,0 +1,38 @@
+newmtl Cover
+Ka 0.20 0.20 0.20
+Kd 0.120 0.250 0.550
+Ks 0.50 0.50 0.50
+Ns 260.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Pages
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 120.0
+Pm 0.00
+map_Kd Paper_Edge.png
+d 1.00
+illum 2
+
+newmtl Tab
+Ka 0.20 0.20 0.20
+Kd 0.120 0.250 0.550
+Ks 0.50 0.50 0.50
+Ns 260.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Emblem
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.00
+map_Kd Town_Emblem.png
+d 1.00
+illum 2
+

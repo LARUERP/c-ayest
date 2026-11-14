@@ -1,0 +1,29 @@
+newmtl Cover
+Ka 0.20 0.20 0.20
+Kd 0.080 0.100 0.200
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+map_Kd Leather.png
+d 1.00
+illum 2
+
+newmtl Pages
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 120.0
+Pm 0.00
+map_Kd Paper_Edge.png
+d 1.00
+illum 2
+
+newmtl Spiral
+Ka 0.20 0.20 0.20
+Kd 0.750 0.770 0.800
+Ks 0.50 0.50 0.50
+Ns 650.0
+Pm 1.00
+d 1.00
+illum 2
+

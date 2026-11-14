@@ -1,0 +1,19 @@
+newmtl Edge
+Ka 0.20 0.20 0.20
+Kd 0.700 0.400 0.260
+Ks 0.50 0.50 0.50
+Ns 700.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl Face
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 650.0
+Pm 0.90
+map_Kd Coin_1Cent.png
+d 1.00
+illum 2
+
