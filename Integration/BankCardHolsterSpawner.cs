@@ -20,7 +20,7 @@ namespace FusionDarkRP.Integration
 
         // Le composant d'arme (WeaponSlotExtender) est parfois attaché par
         // LabFusion quelques images APRÈS le rappel de création : au lieu
-        // d'abandonner (et de détruire la carte), on réessaie jusqu'à 5 s.
+        // d'abandonner (et de détruire la carte), on réessaie jusqu'à 15 s.
         private sealed class PendingCard
         {
             public NetworkAssetSpawner.SpawnCallbackInfo Info;
@@ -283,7 +283,7 @@ namespace FusionDarkRP.Integration
                         CardId = cardId,
                         OnInserted = onInserted,
                         OnRollback = onRollback,
-                        Deadline = now + 5f
+                        Deadline = now + 15f
                     };
 
                     MelonLogger.Msg(
@@ -302,7 +302,7 @@ namespace FusionDarkRP.Integration
 
                 MelonLogger.Error(
                     "[FusionDarkRP Card] Composant WeaponSlot toujours absent "
-                    + "après 5 s : création abandonnée."
+                    + "après 15 s : création abandonnée."
                 );
                 return;
             }

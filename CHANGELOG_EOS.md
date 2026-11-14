@@ -54,3 +54,8 @@
 # 3.9.0 (non compilé ici ; corrections tirées du journal 26-11-14_19-26-54)
 - Carte bancaire qui n'apparaissait plus : le rappel de création arrivait avant que LabFusion attache le composant d'arme (WeaponSlotExtender) ; la carte était alors détruite avec "Composant WeaponSlot absent". La création est maintenant mise en attente et relancée toutes les 50 ms pendant 5 s (BankCardHolsterSpawner.Update, branché sur EconomyLifecycleMod.Update). L'enregistrement bancaire n'a lieu qu'après l'insertion physique, donc aucun compte n'est modifié si la création échoue.
 - Note : les messages LabFusion "Handler ... was already registered" sont bénins (module enregistré deux fois) et n'empêchent rien.
+
+# 3.9.1 (non compilé ici ; d'après le journal 26-11-14_19-47-42)
+- Dépôt d'argent au distributeur : l'hôte répondait « Insérez votre carte bancaire dans le lecteur » alors que la carte était dans la fente. Sa recherche de la carte ne remontait pas aux parents de l'objet (le joueur, lui, le faisait) et ne comparait pas avec la carte annoncée. Recherche alignée sur celle du joueur (collider, rigidbody, 8 parents) avec préférence pour la carte demandée.
+- Carte bancaire visible des deux côtés : suppression des faces arrière désactivée (cull off) sur ses matériaux.
+- Création de la carte : attente du composant d'arme portée de 5 à 15 s (un échec « WeaponSlot absent » apparaissait au premier essai).

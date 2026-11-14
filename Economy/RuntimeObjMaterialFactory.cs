@@ -134,6 +134,22 @@ namespace FusionDarkRP.Economy
 
                 ApplyColor(created, color);
 
+                // Carte bancaire : visible des deux faces, quel que soit le
+                // côté sur lequel elle tombe.
+                if (string.Equals(
+                        normalizedName,
+                        "BankCard",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    if (created.HasProperty("_Cull"))
+                        created.SetFloat("_Cull", 0f);
+
+                    if (created.HasProperty("_CullMode"))
+                        created.SetFloat("_CullMode", 0f);
+
+                    created.doubleSidedGI = true;
+                }
+
                 if (created.HasProperty("_Metallic"))
                 {
                     created.SetFloat(

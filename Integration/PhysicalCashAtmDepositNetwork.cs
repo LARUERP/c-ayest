@@ -254,7 +254,8 @@ namespace FusionDarkRP.Integration
                 return;
             }
 
-            if (!TryGetCardInReader(atm, out string detectedCardId) ||
+            if (!TryGetCardInReader(
+                    atm, data.CardId, out string detectedCardId) ||
                 !string.Equals(
                     detectedCardId,
                     data.CardId,
@@ -411,6 +412,7 @@ namespace FusionDarkRP.Integration
 
         private static bool TryGetCardInReader(
             GameObject atm,
+            string expectedCardId,
             out string cardId)
         {
             cardId = null;
@@ -439,29 +441,77 @@ namespace FusionDarkRP.Integration
             if (colliders == null || colliders.Length == 0)
                 return false;
 
+            string firstCard = null;
+
             foreach (Collider collider in colliders)
             {
                 if (collider == null)
                     continue;
 
-                GameObject candidate =
-                    collider.attachedRigidbody != null
-                        ? collider.attachedRigidbody.gameObject
-                        : collider.gameObject;
+                // Même recherche que côté joueur : l'objet du collider,
+                // celui de son rigidbody, puis les parents (les métadonnées
+                // de la carte peuvent être sur la racine de l'entité).
+                Transform candidate = collider.transform;
 
-                if (BankCardHolsterMetadataNetwork.TryGetCardId(
-                    candidate,
-                    out string detectedCardId))
+                if (collider.attachedRigidbody != null)
                 {
-                    if (IsGuid(detectedCardId))
+                    string viaBody;
+
+                    if (BankCardHolsterMetadataNetwork.TryGetCardId(
+                            collider.attachedRigidbody.gameObject,
+                            out viaBody) &&
+                        IsGuid(viaBody))
                     {
-                        cardId = detectedCardId;
-                        return true;
+                        if (string.Equals(
+                                viaBody,
+                                expectedCardId,
+                                StringComparison.Ordinal))
+                        {
+                            cardId = viaBody;
+                            return true;
+                        }
+
+                        if (firstCard == null)
+                            firstCard = viaBody;
                     }
+                }
+
+                int depth = 0;
+
+                while (candidate != null && depth < 8)
+                {
+                    string found;
+
+                    if (BankCardHolsterMetadataNetwork.TryGetCardId(
+                            candidate.gameObject,
+                            out found) &&
+                        IsGuid(found))
+                    {
+                        if (string.Equals(
+                                found,
+                                expectedCardId,
+                                StringComparison.Ordinal))
+                        {
+                            cardId = found;
+                            return true;
+                        }
+
+                        if (firstCard == null)
+                            firstCard = found;
+
+                        break;
+                    }
+
+                    if (candidate == atm.transform)
+                        break;
+
+                    candidate = candidate.parent;
+                    depth++;
                 }
             }
 
-            return false;
+            cardId = firstCard;
+            return firstCard != null;
         }
 
         private static bool IsCardAuthorized(
