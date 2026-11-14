@@ -262,6 +262,11 @@ namespace FusionDarkRP.Integration
             private static readonly Vector3 CardSlotHalfExtents =
                 new Vector3(0.075f, 0.045f, 0.055f);
 
+            // Position finale de la carte insérée : 6 mm devant la plaque du
+            // lecteur (plaque à z = -0,191, centre de détection à z = -0,205).
+            private static readonly Vector3 CardInsertedOffset =
+                new Vector3(0f, 0f, 0.006f);
+
             public AtmScreen(GameObject atm)
             {
                 if (atm == null)

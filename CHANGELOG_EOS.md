@@ -47,3 +47,6 @@
 - Écran du distributeur : le bouton EJECTER MA CARTE était exactement superposé au bouton RETIRER 100 EUR (impossible de reprendre la carte). Mise en page refaite sans chevauchement.
 - Carte insérée : remise droite (face parallèle à la plaque du lecteur, grand côté horizontal) et plaquée à 6 mm devant la plaque.
 - Portefeuille : la sortie d'espèces demande maintenant de maintenir la gâchette ~0,7 s (avec pourcentage affiché), zone réduite à 13 cm ; plus de billets sortis par accident.
+
+# 3.8.1 — correction de compilation
+- AtmPhysicalInteraction : la constante CardInsertedOffset utilisée par LockCard n'était pas déclarée (erreur CS0103 ligne 444 du build GitHub Actions n°5). Déclarée.
