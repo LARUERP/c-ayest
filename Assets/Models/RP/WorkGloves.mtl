@@ -1,0 +1,28 @@
+newmtl Glove
+Ka 0.20 0.20 0.20
+Kd 0.850 0.650 0.120
+Ks 0.50 0.50 0.50
+Ns 180.0
+Pm 0.00
+map_Kd Leather.png
+d 1.00
+illum 2
+
+newmtl Cuff
+Ka 0.20 0.20 0.20
+Kd 0.120 0.120 0.140
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Grip
+Ka 0.20 0.20 0.20
+Kd 0.080 0.080 0.090
+Ks 0.50 0.50 0.50
+Ns 120.0
+Pm 0.00
+d 1.00
+illum 2
+
