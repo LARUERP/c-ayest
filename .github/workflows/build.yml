@@ -208,7 +208,7 @@ jobs:
         run: |
           {
             echo "Fusion DarkRP Ultimate"
-            echo "Version: 3.5.1-EOS"
+            echo "Version: 3.5.2-EOS"
             echo "Target: BONELAB Quest / LabFusion"
             echo "Framework: .NET 6"
             echo "Configuration: Release"

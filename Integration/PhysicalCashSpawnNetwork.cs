@@ -485,7 +485,7 @@ namespace FusionDarkRP.Integration
             Guid parsedCardId = Guid.Empty;
 
             bool walletRequest = string.Equals(
-                cardId, WalletCardId, StringComparison.Ordinal);
+                cardId, PhysicalCashSpawnRequestHandler.WalletCardId, StringComparison.Ordinal);
 
             bool cardAccepted =
                 walletRequest ||
@@ -515,7 +515,7 @@ namespace FusionDarkRP.Integration
                         RequestId = requestId,
                         ItemId = itemId,
                         CardId = walletRequest
-                            ? WalletCardId
+                            ? PhysicalCashSpawnRequestHandler.WalletCardId
                             : parsedCardId.ToString("N")
                     };
 

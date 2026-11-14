@@ -26,3 +26,4 @@
 - Portefeuille : tout billet apporté à moins de 25 cm est rangé (demande de rangement journalisée « Billet près du portefeuille »).
 # 3.5.1 (non compilé ici)
 - Billet encaissé mais resté visible : l'hôte journalise le retrait et supprime de force (Poolee.Despawn puis Destroy) tout porteur encore présent 1,2 s après le despawn LabFusion.
+# 3.5.2 — correction de compilation (erreur GitHub Actions : WalletCardId hors de portée)
