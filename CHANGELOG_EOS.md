@@ -50,3 +50,7 @@
 
 # 3.8.1 — correction de compilation
 - AtmPhysicalInteraction : la constante CardInsertedOffset utilisée par LockCard n'était pas déclarée (erreur CS0103 ligne 444 du build GitHub Actions n°5). Déclarée.
+
+# 3.9.0 (non compilé ici ; corrections tirées du journal 26-11-14_19-26-54)
+- Carte bancaire qui n'apparaissait plus : le rappel de création arrivait avant que LabFusion attache le composant d'arme (WeaponSlotExtender) ; la carte était alors détruite avec "Composant WeaponSlot absent". La création est maintenant mise en attente et relancée toutes les 50 ms pendant 5 s (BankCardHolsterSpawner.Update, branché sur EconomyLifecycleMod.Update). L'enregistrement bancaire n'a lieu qu'après l'insertion physique, donc aucun compte n'est modifié si la création échoue.
+- Note : les messages LabFusion "Handler ... was already registered" sont bénins (module enregistré deux fois) et n'empêchent rien.

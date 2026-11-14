@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using Il2CppSLZ.Marrow;
 using Il2CppSLZ.Marrow.Interaction;
 using LabFusion.Data;
@@ -16,6 +17,66 @@ namespace FusionDarkRP.Integration
     {
         private static bool spawning;
         private static PlayerID targetPlayerForSlots;
+
+        // Le composant d'arme (WeaponSlotExtender) est parfois attaché par
+        // LabFusion quelques images APRÈS le rappel de création : au lieu
+        // d'abandonner (et de détruire la carte), on réessaie jusqu'à 5 s.
+        private sealed class PendingCard
+        {
+            public NetworkAssetSpawner.SpawnCallbackInfo Info;
+            public InventorySlotReceiver Receiver;
+            public NetworkEntity SlotEntity;
+            public byte SlotIndex;
+            public string CardId;
+            public Func<bool> OnInserted;
+            public Action OnRollback;
+            public float Deadline;
+        }
+
+        private static readonly List<PendingCard> Pending =
+            new List<PendingCard>();
+
+        private static float nextPendingCheck;
+
+        /// <summary>
+        /// Appelée à chaque image : relance les créations de carte dont le
+        /// composant d'arme n'était pas encore prêt.
+        /// </summary>
+        public static void Update()
+        {
+            if (Pending.Count == 0)
+                return;
+
+            if (UnityEngine.Time.realtimeSinceStartup < nextPendingCheck)
+                return;
+
+            nextPendingCheck = UnityEngine.Time.realtimeSinceStartup + 0.05f;
+
+            PendingCard[] snapshot = Pending.ToArray();
+            Pending.Clear();
+
+            foreach (PendingCard pending in snapshot)
+            {
+                try
+                {
+                    HandleSpawnCompleted(
+                        pending.Info,
+                        pending.Receiver,
+                        pending.SlotEntity,
+                        pending.SlotIndex,
+                        pending.CardId,
+                        pending.OnInserted,
+                        pending.OnRollback,
+                        pending);
+                }
+                catch (Exception exception)
+                {
+                    MelonLogger.Error(
+                        "[FusionDarkRP Card] Nouvelle tentative impossible : "
+                        + exception);
+                }
+            }
+        }
 
         public static bool TrySpawnForPlayer(
             PlayerID targetPlayer,
@@ -181,7 +242,8 @@ namespace FusionDarkRP.Integration
             byte slotIndex,
             string cardId,
             Func<bool> onInserted,
-            Action onRollback)
+            Action onRollback,
+            PendingCard pending = null)
         {
             if (info.Spawned == null || info.Entity == null)
             {
@@ -193,17 +255,54 @@ namespace FusionDarkRP.Integration
 
             NetworkEntity entity = info.Entity;
 
-            WeaponSlotExtender weaponExtender =
-                entity.GetExtender<WeaponSlotExtender>();
+            WeaponSlotExtender weaponExtender = null;
+
+            try
+            {
+                weaponExtender = entity.GetExtender<WeaponSlotExtender>();
+            }
+            catch
+            {
+                weaponExtender = null;
+            }
 
             if (weaponExtender == null ||
                 weaponExtender.Component == null ||
                 weaponExtender.Component.interactableHost == null)
             {
+                float now = UnityEngine.Time.realtimeSinceStartup;
+
+                if (pending == null)
+                {
+                    pending = new PendingCard
+                    {
+                        Info = info,
+                        Receiver = receiver,
+                        SlotEntity = slotEntity,
+                        SlotIndex = slotIndex,
+                        CardId = cardId,
+                        OnInserted = onInserted,
+                        OnRollback = onRollback,
+                        Deadline = now + 5f
+                    };
+
+                    MelonLogger.Msg(
+                        "[FusionDarkRP Card] Composant du support pas encore "
+                        + "prêt : nouvelle tentative."
+                    );
+                }
+
+                if (now < pending.Deadline)
+                {
+                    Pending.Add(pending);
+                    return;
+                }
+
                 Despawn(entity);
 
                 MelonLogger.Error(
-                    "[FusionDarkRP Card] Composant WeaponSlot absent."
+                    "[FusionDarkRP Card] Composant WeaponSlot toujours absent "
+                    + "après 5 s : création abandonnée."
                 );
                 return;
             }

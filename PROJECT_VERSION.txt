@@ -1,4 +1,4 @@
 Fusion DarkRP Ultimate
-Version: 3.8.1-EOS
+Version: 3.9.0-EOS
 Cible : BONELAB Quest + LabFusion EOS uniquement.
 Statut : source non compilee par l'auteur de ce paquet ; compiler via GitHub Actions.

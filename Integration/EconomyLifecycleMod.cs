@@ -391,6 +391,18 @@ namespace FusionDarkRP.Integration
 
             try
             {
+                BankCardHolsterSpawner.Update();
+            }
+            catch (Exception exception)
+            {
+                MelonLogger.Warning(
+                    "[FusionDarkRP Card] Création différée : "
+                    + exception.Message
+                );
+            }
+
+            try
+            {
                 CarrierObjects.TickRemovals();
             }
             catch (Exception exception)
