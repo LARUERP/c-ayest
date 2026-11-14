@@ -1,0 +1,116 @@
+
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>FusionDarkRPUltimate</AssemblyName>
+    <RootNamespace>FusionDarkRP</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="UnityEngine.Object" Alias="Object" />
+    <PackageReference Include="HarmonyX" Version="2.13.0" />
+
+    <Reference Include="MelonLoader">
+      <HintPath>Libs/MelonLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>Libs/Il2Cppmscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>Libs/Il2CppInterop.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppSLZ.Marrow">
+      <HintPath>Libs/Il2CppSLZ.Marrow.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="LabFusion">
+      <HintPath>Libs/LabFusion.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BoneLib">
+      <HintPath>Libs/BoneLib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>Libs/Il2CppAssemblies/Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>Libs/Il2CppAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>Libs/Il2CppAssemblies/UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>Libs/UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>Libs/UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>Libs/UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>Libs/UnityDependencies/UnityEngine.AudioModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>Libs/UnityDependencies/UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreTextEngineModule">
+      <HintPath>Libs/UnityDependencies/UnityEngine.TextCoreTextEngineModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreFontEngineModule">
+      <HintPath>Libs/UnityDependencies/UnityEngine.TextCoreFontEngineModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>Libs/UnityDependencies/UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>Libs/UnityDependencies/UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.VideoModule">
+      <HintPath>Libs/UnityDependencies/UnityEngine.VideoModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets/Models/Money/**/*.png">
+      <LogicalName>FusionDarkRP.MoneyModels.%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Assets/Models/RP/**/*.obj">
+      <LogicalName>FusionDarkRP.MoneyModels.%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Assets/Models/RP/**/*.mtl">
+      <LogicalName>FusionDarkRP.MoneyModels.%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Assets/Models/Money/**/*.obj">
+      <LogicalName>FusionDarkRP.MoneyModels.%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Assets/Models/Money/**/*.mtl">
+      <LogicalName>FusionDarkRP.MoneyModels.%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Assets/file_000000009ab8820aba79235cc9bdc115.png">
+      <LogicalName>FusionDarkRP.Assets.WristBackground.png</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,155 @@
+newmtl Plinth
+Ka 0.20 0.20 0.20
+Kd 0.100 0.100 0.120
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.60
+map_Kd Steel_Dark.png
+d 1.00
+illum 2
+
+newmtl Body
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 400.0
+Pm 0.80
+map_Kd Steel_Dark.png
+d 1.00
+illum 2
+
+newmtl Trim
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 480.0
+Pm 0.85
+map_Kd Steel_Mid.png
+d 1.00
+illum 2
+
+newmtl DoorSide
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 520.0
+Pm 0.90
+map_Kd Steel_Mid.png
+d 1.00
+illum 2
+
+newmtl DoorFace
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 560.0
+Pm 0.90
+map_Kd Steel_Light.png
+d 1.00
+illum 2
+
+newmtl Brass
+Ka 0.20 0.20 0.20
+Kd 0.820 0.660 0.300
+Ks 0.50 0.50 0.50
+Ns 700.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl Bolt
+Ka 0.20 0.20 0.20
+Kd 0.620 0.640 0.680
+Ks 0.50 0.50 0.50
+Ns 650.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl Chrome
+Ka 0.20 0.20 0.20
+Kd 0.880 0.890 0.920
+Ks 0.50 0.50 0.50
+Ns 820.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl Dial
+Ka 0.20 0.20 0.20
+Kd 0.120 0.120 0.140
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.80
+d 1.00
+illum 2
+
+newmtl DialFace
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 600.0
+Pm 0.00
+map_Kd Safe_Dial.png
+d 1.00
+illum 2
+
+newmtl Label
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 520.0
+Pm 0.80
+map_Kd Vault_Label.png
+d 1.00
+illum 2
+
+newmtl KeyHousing
+Ka 0.20 0.20 0.20
+Kd 0.080 0.090 0.110
+Ks 0.50 0.50 0.50
+Ns 450.0
+Pm 0.50
+d 1.00
+illum 2
+
+newmtl Status
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 700.0
+Pm 0.00
+Ke 0.100 0.500 0.250
+map_Kd Status_Access.png
+d 1.00
+illum 2
+
+newmtl KeyBody
+Ka 0.20 0.20 0.20
+Kd 0.100 0.100 0.120
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Key
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 650.0
+Pm 0.00
+map_Kd Keypad.png
+d 1.00
+illum 2
+
+newmtl LedRed
+Ka 0.20 0.20 0.20
+Kd 0.900 0.120 0.100
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.00
+Ke 0.900 0.100 0.080
+d 1.00
+illum 2
+

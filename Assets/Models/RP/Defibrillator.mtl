@@ -1,0 +1,57 @@
+newmtl Body
+Ka 0.20 0.20 0.20
+Kd 0.900 0.780 0.100
+Ks 0.50 0.50 0.50
+Ns 520.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Front
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 520.0
+Pm 0.00
+map_Kd Defib.png
+d 1.00
+illum 2
+
+newmtl Handle
+Ka 0.20 0.20 0.20
+Kd 0.100 0.100 0.120
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Paddle
+Ka 0.20 0.20 0.20
+Kd 0.080 0.080 0.100
+Ks 0.50 0.50 0.50
+Ns 450.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Cable
+Ka 0.20 0.20 0.20
+Kd 0.020 0.020 0.020
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Screen
+Ka 0.20 0.20 0.20
+Kd 0.100 0.600 0.300
+Ks 0.50 0.50 0.50
+Ns 800.0
+Pm 0.00
+Ke 0.100 0.700 0.300
+map_Kd Screen_Glow.png
+d 1.00
+illum 2
+

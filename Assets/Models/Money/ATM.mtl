@@ -1,0 +1,158 @@
+newmtl Plinth
+Ka 0.20 0.20 0.20
+Kd 0.120 0.130 0.150
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.60
+map_Kd Steel_Dark.png
+d 1.00
+illum 2
+
+newmtl Body
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 380.0
+Pm 0.70
+map_Kd Steel_Dark.png
+d 1.00
+illum 2
+
+newmtl Fascia
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 420.0
+Pm 0.70
+map_Kd ATM_Fascia.png
+d 1.00
+illum 2
+
+newmtl Cap
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 520.0
+Pm 0.90
+map_Kd Steel_Light.png
+d 1.00
+illum 2
+
+newmtl Sign
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+Ke 0.550 0.650 0.900
+map_Kd ATM_Sign.png
+d 1.00
+illum 2
+
+newmtl Bezel
+Ka 0.20 0.20 0.20
+Kd 0.020 0.020 0.025
+Ks 0.50 0.50 0.50
+Ns 880.0
+Pm 0.10
+d 1.00
+illum 2
+
+newmtl Screen
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 900.0
+Pm 0.00
+Ke 0.100 0.280 0.550
+map_Kd ATM_Screen.png
+d 1.00
+illum 2
+
+newmtl SideKey
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 600.0
+Pm 0.90
+map_Kd Steel_Light.png
+d 1.00
+illum 2
+
+newmtl KeyHousing
+Ka 0.20 0.20 0.20
+Kd 0.090 0.100 0.120
+Ks 0.50 0.50 0.50
+Ns 450.0
+Pm 0.50
+d 1.00
+illum 2
+
+newmtl KeyBody
+Ka 0.20 0.20 0.20
+Kd 0.100 0.100 0.120
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Key
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 650.0
+Pm 0.00
+map_Kd Keypad.png
+d 1.00
+illum 2
+
+newmtl CardPlate
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.00
+map_Kd ATM_CardPlate.png
+d 1.00
+illum 2
+
+newmtl CashPlate
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.00
+map_Kd ATM_CashPlate.png
+d 1.00
+illum 2
+
+newmtl Slot
+Ka 0.20 0.20 0.20
+Kd 0.010 0.010 0.012
+Ks 0.50 0.50 0.50
+Ns 700.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Vent
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+map_Kd ATM_Vent.png
+d 1.00
+illum 2
+
+newmtl LedGreen
+Ka 0.20 0.20 0.20
+Kd 0.100 0.800 0.300
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.00
+Ke 0.100 0.900 0.350
+d 1.00
+illum 2
+
