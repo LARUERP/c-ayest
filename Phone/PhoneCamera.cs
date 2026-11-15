@@ -59,12 +59,14 @@ public sealed class PhoneCamera : IDisposable
             camera.cullingMask = -33;
             camera.clearFlags = (CameraClearFlags)1;
             camera.allowHDR = false;
-            camera.allowMSAA = false;
+            camera.allowMSAA = true;
 
             preview = new RenderTexture(320, 240, 24, (RenderTextureFormat)0);
+            preview.antiAliasing = 4;
             preview.Create();
 
             live = new RenderTexture(320, 240, 24, (RenderTextureFormat)0);
+            live.antiAliasing = 4;
             live.Create();
 
             smallPixels = new Texture2D(320, 240, (TextureFormat)3, false);
@@ -73,6 +75,7 @@ public sealed class PhoneCamera : IDisposable
         if (large && photo == null)
         {
             photo = new RenderTexture(640, 480, 24, (RenderTextureFormat)0);
+            photo.antiAliasing = 4;
             photo.Create();
 
             largePixels = new Texture2D(640, 480, (TextureFormat)3, false);

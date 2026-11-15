@@ -112,5 +112,8 @@
     <EmbeddedResource Include="Assets/file_000000009ab8820aba79235cc9bdc115.png">
       <LogicalName>FusionDarkRP.Assets.WristBackground.png</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Assets/PhoneWallpaper.png">
+      <LogicalName>FusionDarkRP.Assets.PhoneWallpaper.png</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

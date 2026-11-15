@@ -359,6 +359,11 @@ namespace FusionDarkRP.Integration
 
                 // Collider léger calé sur la géométrie réelle.
                 BoxCollider box = visual.AddComponent<BoxCollider>();
+
+                // Déclencheur : le visuel ne pousse jamais le joueur
+                // (les colliders d'origine de l'arme gèrent la physique).
+                if (box != null)
+                    box.isTrigger = true;
                 box.center = mesh.bounds.center;
                 box.size = new Vector3(
                     Mathf.Max(mesh.bounds.size.x, 0.005f),

@@ -265,7 +265,7 @@ namespace FusionDarkRP.Integration
             // Position finale de la carte insérée : 6 mm devant la plaque du
             // lecteur (plaque à z = -0,191, centre de détection à z = -0,205).
             private static readonly Vector3 CardInsertedOffset =
-                new Vector3(0f, 0f, 0.006f);
+                new Vector3(0f, 0f, -0.0088f);
 
             public AtmScreen(GameObject atm)
             {
@@ -430,7 +430,11 @@ namespace FusionDarkRP.Integration
 
                     // 1) Carte remise droite : face parallèle à la plaque du
                     //    lecteur, grand côté à l'horizontale, haut vers le haut.
-                    Quaternion wanted = body.transform.rotation;
+                    // Carte à plat, grand côté dans l'axe de la fente : elle
+                    // entre par la tranche dans le lecteur.
+                    Quaternion wanted =
+                        Quaternion.LookRotation(
+                            body.transform.up, body.transform.right);
 
                     Quaternion correction =
                         wanted *

@@ -845,9 +845,8 @@ public sealed class PhoneApp
 		//IL_009f: Unknown result type (might be due to invalid IL or missing references)
 		//IL_00b0: Unknown result type (might be due to invalid IL or missing references)
 		string visibleWallpaper = mod.VisibleWallpaper;
-		if (!(visibleWallpaper == ""))
 		{
-			Texture2D val = mod.Media.PictureFor(visibleWallpaper);
+			Texture2D val = (visibleWallpaper == "") ? FusionDarkRP.Integration.RpPhoneWallpaper.Get() : mod.Media.PictureFor(visibleWallpaper);
 			if (!((Object)(object)val == (Object)null))
 			{
 				surface.Picture((Texture)(object)val, 0f, 0f, 600f, 1000f, crop: true);

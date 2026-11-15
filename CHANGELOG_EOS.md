@@ -59,3 +59,11 @@
 - Dépôt d'argent au distributeur : l'hôte répondait « Insérez votre carte bancaire dans le lecteur » alors que la carte était dans la fente. Sa recherche de la carte ne remontait pas aux parents de l'objet (le joueur, lui, le faisait) et ne comparait pas avec la carte annoncée. Recherche alignée sur celle du joueur (collider, rigidbody, 8 parents) avec préférence pour la carte demandée.
 - Carte bancaire visible des deux côtés : suppression des faces arrière désactivée (cull off) sur ses matériaux.
 - Création de la carte : attente du composant d'arme portée de 5 à 15 s (un échec « WeaponSlot absent » apparaissait au premier essai).
+
+# 3.10.0 (non compilé ici ; d'après le journal 26-11-15_1-51-27 et les captures)
+- Carte bancaire : création fiable — si l'extender LabFusion tarde, le composant d'arme du jeu est lu directement sur l'objet créé (les 2 premiers essais du journal échouaient après 15 s).
+- Carte au distributeur : insérée par la tranche, à plat, dans l'axe de la fente (plus de carte plaquée de face).
+- Distributeur surélevé : piédestal de 45 cm sous l'origine du modèle, posé 45 cm plus haut (fente carte et plateau d'espèces à hauteur de hanche). Aperçu de placement décalé de même. Les distributeurs déjà posés restent à l'ancienne hauteur.
+- Poussée au holster : colliders des visuels (objets porteurs et carte) passés en déclencheurs.
+- Selfie : MSAA 4x activé sur la caméra et ses textures (cheveux blancs).
+- Téléphone : fond d'écran par défaut = image « LA RUE RP » (accueil et écran verrouillé) tant qu'aucune photo n'est choisie.

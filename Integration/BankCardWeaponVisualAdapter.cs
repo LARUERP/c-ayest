@@ -136,6 +136,9 @@ namespace FusionDarkRP.Integration
 
                 BoxCollider cardCollider = visualObject.AddComponent<BoxCollider>();
 
+                if (cardCollider != null)
+                    cardCollider.isTrigger = true;
+
                 if (cardCollider == null)
                 {
                     error = "Impossible de créer le collider de la carte.";

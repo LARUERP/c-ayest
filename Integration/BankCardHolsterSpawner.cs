@@ -255,20 +255,38 @@ namespace FusionDarkRP.Integration
 
             NetworkEntity entity = info.Entity;
 
-            WeaponSlotExtender weaponExtender = null;
+            WeaponSlot weaponSlot = null;
 
             try
             {
-                weaponExtender = entity.GetExtender<WeaponSlotExtender>();
+                WeaponSlotExtender weaponExtender =
+                    entity.GetExtender<WeaponSlotExtender>();
+
+                if (weaponExtender != null)
+                    weaponSlot = weaponExtender.Component;
             }
             catch
             {
-                weaponExtender = null;
+                weaponSlot = null;
             }
 
-            if (weaponExtender == null ||
-                weaponExtender.Component == null ||
-                weaponExtender.Component.interactableHost == null)
+            // Repli : l'extender LabFusion peut tarder ; le composant du jeu
+            // est déjà présent sur l'objet créé.
+            if (weaponSlot == null)
+            {
+                try
+                {
+                    weaponSlot =
+                        info.Spawned.GetComponentInChildren<WeaponSlot>(true);
+                }
+                catch
+                {
+                    weaponSlot = null;
+                }
+            }
+
+            if (weaponSlot == null ||
+                weaponSlot.interactableHost == null)
             {
                 float now = UnityEngine.Time.realtimeSinceStartup;
 
@@ -324,7 +342,7 @@ namespace FusionDarkRP.Integration
             string visualError;
 
             if (!BankCardWeaponVisualAdapter.TryApply(
-                weaponExtender.Component.gameObject,
+                weaponSlot.gameObject,
                 out visualError))
             {
                 Despawn(entity);
@@ -343,7 +361,7 @@ namespace FusionDarkRP.Integration
                 if (holsterMode)
                 {
                     IGrippable grippable =
-                        weaponExtender.Component.interactableHost
+                        weaponSlot.interactableHost
                             .TryCast<IGrippable>();
 
                     if (grippable == null)
@@ -361,7 +379,7 @@ namespace FusionDarkRP.Integration
 
                         // Le premier emplacement libre peut refuser un pistolet
                         // (type d'emplacement différent) : on essaie les autres.
-                        if (receiver._slottedWeapon != weaponExtender.Component)
+                        if (receiver._slottedWeapon != weaponSlot)
                         {
                             foreach (InventorySlotReceiver other in
                                 BankCardHolsterSlotResolver.EmptySlots(targetPlayerForSlots))
@@ -379,7 +397,7 @@ namespace FusionDarkRP.Integration
                                     continue;
                                 }
 
-                                if (other._slottedWeapon == weaponExtender.Component)
+                                if (other._slottedWeapon == weaponSlot)
                                 {
                                     receiver = other;
                                     break;
@@ -387,7 +405,7 @@ namespace FusionDarkRP.Integration
                             }
                         }
 
-                        if (receiver._slottedWeapon != weaponExtender.Component)
+                        if (receiver._slottedWeapon != weaponSlot)
                         {
                             // Insertion refusée : la carte reste utilisable
                             // en objet saisissable plutôt que d'être annulée.
@@ -456,7 +474,7 @@ namespace FusionDarkRP.Integration
                 {
                     if (receiver != null &&
                         receiver._slottedWeapon ==
-                        weaponExtender.Component)
+                        weaponSlot)
                     {
                         receiver.DropWeapon();
                     }
@@ -470,7 +488,7 @@ namespace FusionDarkRP.Integration
                 }
 
                 BankCardWeaponVisualAdapter.TryRemove(
-                    weaponExtender.Component.gameObject,
+                    weaponSlot.gameObject,
                     out visualError
                 );
 

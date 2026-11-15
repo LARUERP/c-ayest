@@ -230,6 +230,9 @@ def build_atm():
     vent = tex("ATM_Vent.png", T.vent_texture())
     fascia = tex("ATM_Fascia.png", T.fascia_texture())
 
+    # Piédestal sous l'origine : le distributeur est posé 45 cm plus haut
+    # (fente de carte et plateau d'espèces à hauteur de hanche, sans se baisser).
+    rbox(m, "Plinth", (0, -0.225, 0), (0.40, 0.45, 0.30), 0.01, 2, tile=3)
     rbox(m, "Plinth", (0, 0.05, 0), (0.44, 0.10, 0.34), 0.01, 2, tile=3)
     rbox(m, "Body", (0, 0.47, 0), (0.45, 0.74, 0.35), 0.012, 2, tile=3)
     rbox(m, {"-z": "Fascia", "+z": "Body", "+x": "Body", "-x": "Body", "+y": "Body", "-y": "Body"},

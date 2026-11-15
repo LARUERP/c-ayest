@@ -542,6 +542,8 @@ namespace FusionDarkRP.Integration
         /// Crée un objet à une pose précise (utilisé par l'aperçu de placement).
         /// Même chemin hôte-autoritaire et synchronisé que le placement classique.
         /// </summary>
+        public const float AtmHeightOffset = 0.45f;
+
         public static bool TrySpawnAtPose(
             string modelId,
             Vector3 position,
@@ -576,6 +578,13 @@ namespace FusionDarkRP.Integration
             }
 
             string createdId;
+
+            // Distributeur : posé sur son piédestal (45 cm sous l'origine).
+            if (string.Equals(
+                    definition.Id, "ATM", StringComparison.OrdinalIgnoreCase))
+            {
+                position += Vector3.up * AtmHeightOffset;
+            }
 
             if (!WorldModelRuntimeManager.TrySpawn(
                     definition.Id, position, rotation, null,

@@ -184,10 +184,21 @@ namespace FusionDarkRP.Integration
                 if (!ComputePose(out position, out rotation))
                     return;
 
+                Vector3 shownPosition = position;
+
+                if (string.Equals(
+                        activeModelId, "ATM",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    shownPosition +=
+                        Vector3.up
+                        * WorldModelPlacementService.AtmHeightOffset;
+                }
+
                 float blend = 1f - Mathf.Exp(-18f * Time.unscaledDeltaTime);
 
                 ghost.transform.position = Vector3.Lerp(
-                    ghost.transform.position, position, blend);
+                    ghost.transform.position, shownPosition, blend);
 
                 ghost.transform.rotation = Quaternion.Slerp(
                     ghost.transform.rotation, rotation, blend);
