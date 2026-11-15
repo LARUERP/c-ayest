@@ -1,3 +1,8 @@
+## 5.0.1 (correctif de compilation)
+- GameItemService.cs : ajout de `using LabFusion.RPC;` (NetworkAssetSpawner introuvable, erreurs CS0246 / CS0103 aux lignes 202-203 et 269-270).
+- PlacementPreview.cs : suppression du champ inutilisé `notifyAt` (avertissement CS0414).
+- Non compilé ici (pas de SDK .NET dans l'environnement) : à valider par GitHub Actions.
+
 # 3.0.1 — compatibilité LabFusion EOS (non compilé ici)
 - PlatformIds.cs : Steam (ulong) et EOS (string) gérés sans recompiler ; 31 fichiers adaptés.
 - Pistolet Eder22 masqué sur toute la hiérarchie + ré-imposé en continu (CarrierVisualAdapter.Tick).

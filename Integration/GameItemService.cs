@@ -6,6 +6,7 @@ using Il2CppSLZ.Marrow.Data;
 using Il2CppSLZ.Marrow.Warehouse;
 using LabFusion.Entities;
 using LabFusion.Network;
+using LabFusion.RPC;
 using LabFusion.Utilities;
 using MelonLoader;
 using MelonLoader.Utils;

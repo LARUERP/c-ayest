@@ -41,7 +41,6 @@ namespace FusionDarkRP.Integration
         private static float yawOffset;
         private static float heightOffset;
         private static float startTime;
-        private static float notifyAt;
 
         public static bool IsActive
         {
@@ -96,7 +95,6 @@ namespace FusionDarkRP.Integration
                 yawOffset = 0f;
                 heightOffset = 0f;
                 startTime = Time.unscaledTime;
-                notifyAt = 0f;
 
                 RpHub.Notify(
                     "Aperçu : " + activeName
