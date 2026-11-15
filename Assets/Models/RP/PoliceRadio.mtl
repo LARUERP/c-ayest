@@ -1,35 +1,72 @@
 newmtl Body
 Ka 0.20 0.20 0.20
-Kd 0.070 0.080 0.100
+Kd 0.050 0.055 0.065
 Ks 0.50 0.50 0.50
-Ns 550.0
+Ns 520.0
 Pm 0.00
+d 1.00
+illum 2
+
+newmtl Trim
+Ka 0.20 0.20 0.20
+Kd 0.160 0.170 0.190
+Ks 0.50 0.50 0.50
+Ns 650.0
+Pm 0.60
 d 1.00
 illum 2
 
 newmtl Antenna
 Ka 0.20 0.20 0.20
-Kd 0.040 0.040 0.050
+Kd 0.030 0.030 0.035
 Ks 0.50 0.50 0.50
-Ns 400.0
-Pm 0.00
-d 1.00
-illum 2
-
-newmtl Button
-Ka 0.20 0.20 0.20
-Kd 0.800 0.150 0.120
-Ks 0.50 0.50 0.50
-Ns 500.0
+Ns 350.0
 Pm 0.00
 d 1.00
 illum 2
 
 newmtl Knob
 Ka 0.20 0.20 0.20
-Kd 0.200 0.200 0.220
+Kd 0.100 0.100 0.110
+Ks 0.50 0.50 0.50
+Ns 450.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Orange
+Ka 0.20 0.20 0.20
+Kd 0.950 0.400 0.050
 Ks 0.50 0.50 0.50
 Ns 500.0
+Pm 0.00
+Ke 0.350 0.120 0.000
+d 1.00
+illum 2
+
+newmtl Ptt
+Ka 0.20 0.20 0.20
+Kd 0.020 0.020 0.025
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Button
+Ka 0.20 0.20 0.20
+Kd 0.150 0.150 0.170
+Ks 0.50 0.50 0.50
+Ns 420.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Frame
+Ka 0.20 0.20 0.20
+Kd 0.020 0.020 0.025
+Ks 0.50 0.50 0.50
+Ns 300.0
 Pm 0.00
 d 1.00
 illum 2
@@ -45,6 +82,15 @@ map_Kd Screen_Glow.png
 d 1.00
 illum 2
 
+newmtl Key
+Ka 0.20 0.20 0.20
+Kd 0.220 0.220 0.250
+Ks 0.50 0.50 0.50
+Ns 400.0
+Pm 0.00
+d 1.00
+illum 2
+
 newmtl Grille
 Ka 0.20 0.20 0.20
 Kd 1.000 1.000 1.000
@@ -52,6 +98,15 @@ Ks 0.50 0.50 0.50
 Ns 250.0
 Pm 0.00
 map_Kd Radio_Grille.png
+d 1.00
+illum 2
+
+newmtl Clip
+Ka 0.20 0.20 0.20
+Kd 0.120 0.120 0.130
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.80
 d 1.00
 illum 2
 

@@ -37,6 +37,15 @@ Pm 1.00
 d 1.00
 illum 2
 
+newmtl Dark
+Ka 0.20 0.20 0.20
+Kd 0.030 0.030 0.035
+Ks 0.50 0.50 0.50
+Ns 250.0
+Pm 0.00
+d 1.00
+illum 2
+
 newmtl LedRed
 Ka 0.20 0.20 0.20
 Kd 0.900 0.120 0.100

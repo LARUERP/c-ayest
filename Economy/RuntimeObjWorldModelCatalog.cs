@@ -194,6 +194,24 @@ namespace FusionDarkRP.Economy
                         WorldModelCategory.RpEquipment, true, false)
                 },
                 {
+                    "PoopPile",
+                    new WorldModelDefinition(
+                        "PoopPile", "Déchet de rue (mission)",
+                        WorldModelCategory.RpEquipment, true, false)
+                },
+                {
+                    "MissionMarker",
+                    new WorldModelDefinition(
+                        "MissionMarker", "Balise de mission",
+                        WorldModelCategory.RpEquipment, false, false)
+                },
+                {
+                    "MoneyPrinter",
+                    new WorldModelDefinition(
+                        "MoneyPrinter", "Imprimante à billets",
+                        WorldModelCategory.RpEquipment, false, true)
+                },
+                {
                     "BankSecurityDoorFrame",
                     new WorldModelDefinition(
                         "BankSecurityDoorFrame",

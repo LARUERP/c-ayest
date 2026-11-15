@@ -490,6 +490,19 @@ namespace FusionDarkRP.Integration
 
             try
             {
+                MissionWorld.Update();
+                MoneyPrinterService.Update();
+            }
+            catch (Exception exception)
+            {
+                MelonLogger.Warning(
+                    "[FusionDarkRP Missions] Mise a jour : "
+                    + exception.Message
+                );
+            }
+
+            try
+            {
                 BankComputerPhysicalInteraction.Update();
             }
             catch (Exception exception)
@@ -503,6 +516,16 @@ namespace FusionDarkRP.Integration
 
         public static void Shutdown()
         {
+            try
+            {
+                MissionWorld.Reset();
+                MoneyPrinterService.Reset();
+            }
+            catch
+            {
+                // Arrêt du mod : sans conséquence.
+            }
+
             if (!initialized)
             {
                 WristCashDisplay.Shutdown();

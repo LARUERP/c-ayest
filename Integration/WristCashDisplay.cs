@@ -426,7 +426,9 @@ namespace FusionDarkRP.Integration
             "Note_50EUR", "Note_100EUR",
             "Coin_1Cent", "Coin_2Cent", "Coin_5Cent",
             "Coin_10Cent", "Coin_20Cent", "Coin_50Cent",
-            "Coin_1EUR", "Coin_2EUR"
+            "Coin_1EUR", "Coin_2EUR",
+            "Band_5EUR", "Band_10EUR", "Band_20EUR",
+            "Band_50EUR", "Band_100EUR"
         };
 
         private static readonly string[] WithdrawLabels =
@@ -435,7 +437,9 @@ namespace FusionDarkRP.Integration
             "Billet 50 €", "Billet 100 €",
             "Pièce 1 c", "Pièce 2 c", "Pièce 5 c",
             "Pièce 10 c", "Pièce 20 c", "Pièce 50 c",
-            "Pièce 1 €", "Pièce 2 €"
+            "Pièce 1 €", "Pièce 2 €",
+            "Liasse 5 € (50)", "Liasse 10 € (50)", "Liasse 20 € (50)",
+            "Liasse 50 € (50)", "Liasse 100 € (50)"
         };
 
         private static int withdrawIndex = 1;

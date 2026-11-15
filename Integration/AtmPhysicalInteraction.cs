@@ -391,6 +391,7 @@ namespace FusionDarkRP.Integration
             private Rigidbody lockedBody;
             private bool lockedWasKinematic;
             private string ejectedCardId;
+            private bool bundleMode;
 
             /// <summary>
             /// La carte est avalée par la fente : elle est lâchée par la main
@@ -710,11 +711,29 @@ namespace FusionDarkRP.Integration
                         )
                     );
 
+                string positional;
+                Collider positionalCollider;
+
+                if (BankCardHolsterMetadataNetwork.TryFindCardInBox(
+                        center,
+                        body.transform.rotation,
+                        halfExtents,
+                        activeCardId,
+                        out positional,
+                        out positionalCollider))
+                {
+                    cardId = positional;
+                    detectedCardCollider = positionalCollider;
+                    return true;
+                }
+
                 Collider[] colliders =
                     Physics.OverlapBox(
                         center,
                         halfExtents,
-                        body.transform.rotation
+                        body.transform.rotation,
+                        ~0,
+                        QueryTriggerInteraction.Collide
                     );
 
                 if (colliders == null)
@@ -936,42 +955,47 @@ namespace FusionDarkRP.Integration
                 );
 
                 Button(
-                    "RETIRER 5 EUR",
+                    (bundleMode ? "LIASSE 5 EUR" : "RETIRER 5 EUR"),
                     -110f, -70f, 215f, 70f,
                     () => RequestOperation(
-                        BankOperationType.Withdraw, 500),
+                        BankOperationType.Withdraw,
+                        bundleMode ? 500 * 50L : 500L),
                     withdrawColor
                 );
 
                 Button(
-                    "RETIRER 10 EUR",
+                    (bundleMode ? "LIASSE 10 EUR" : "RETIRER 10 EUR"),
                     110f, -70f, 215f, 70f,
                     () => RequestOperation(
-                        BankOperationType.Withdraw, 1000),
+                        BankOperationType.Withdraw,
+                        bundleMode ? 1000 * 50L : 1000L),
                     withdrawColor
                 );
 
                 Button(
-                    "RETIRER 20 EUR",
+                    (bundleMode ? "LIASSE 20 EUR" : "RETIRER 20 EUR"),
                     -110f, -155f, 215f, 70f,
                     () => RequestOperation(
-                        BankOperationType.Withdraw, 2000),
+                        BankOperationType.Withdraw,
+                        bundleMode ? 2000 * 50L : 2000L),
                     withdrawColor
                 );
 
                 Button(
-                    "RETIRER 50 EUR",
+                    (bundleMode ? "LIASSE 50 EUR" : "RETIRER 50 EUR"),
                     110f, -155f, 215f, 70f,
                     () => RequestOperation(
-                        BankOperationType.Withdraw, 5000),
+                        BankOperationType.Withdraw,
+                        bundleMode ? 5000 * 50L : 5000L),
                     withdrawColor
                 );
 
                 Button(
-                    "RETIRER 100 EUR",
+                    (bundleMode ? "LIASSE 100 EUR" : "RETIRER 100 EUR"),
                     0f, -240f, 440f, 70f,
                     () => RequestOperation(
-                        BankOperationType.Withdraw, 10000),
+                        BankOperationType.Withdraw,
+                        bundleMode ? 10000 * 50L : 10000L),
                     withdrawColor
                 );
 
@@ -983,10 +1007,23 @@ namespace FusionDarkRP.Integration
                 );
 
                 Button(
-                    "ACTUALISER MON COMPTE",
-                    0f, -410f, 520f, 70f,
+                    "ACTUALISER",
+                    -130f, -410f, 255f, 70f,
                     RequestBalances,
                     new Color(0.12f, 0.3f, 0.48f)
+                );
+
+                Button(
+                    bundleMode
+                        ? "MODE : LIASSES x50"
+                        : "MODE : BILLETS",
+                    130f, -410f, 255f, 70f,
+                    () =>
+                    {
+                        bundleMode = !bundleMode;
+                        Draw();
+                    },
+                    new Color(0.35f, 0.28f, 0.1f)
                 );
 
                 Label(

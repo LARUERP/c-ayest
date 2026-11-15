@@ -277,6 +277,27 @@ namespace FusionDarkRP.Integration
                     itemId = "Note_100EUR";
                     return true;
 
+                // Liasses de 50 billets.
+                case 25000:
+                    itemId = "Band_5EUR";
+                    return true;
+
+                case 50000:
+                    itemId = "Band_10EUR";
+                    return true;
+
+                case 100000:
+                    itemId = "Band_20EUR";
+                    return true;
+
+                case 250000:
+                    itemId = "Band_50EUR";
+                    return true;
+
+                case 500000:
+                    itemId = "Band_100EUR";
+                    return true;
+
                 default:
                     return false;
             }

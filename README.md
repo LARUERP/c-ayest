@@ -35,6 +35,9 @@ Porte de sécurité : placez d'abord **Cadre de porte de sécurité** puis **Por
 ## Documents
 `AUDIT_FINAL_FR.md` (audit, vérifications, limites) · `FONCTIONNALITES_FR.md`.
 
+## 4.0.0-EOS (voir CHANGELOG_EOS.md)
+Nouveautés : missions réelles, imprimante à billets, liasses de 50 billets, radio/menottes/porte refaites.
+
 ## 3.1.0-EOS
 Version dédiée LabFusion EOS (Libs/LabFusion.dll = build EOS). Voir CHANGELOG_EOS.md.
 Placement : regarder où poser, A = poser, B = annuler, clic stick gauche = tourner.

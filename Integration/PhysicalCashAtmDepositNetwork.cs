@@ -433,10 +433,27 @@ namespace FusionDarkRP.Integration
                         Mathf.Abs(scale.y),
                         Mathf.Abs(scale.z)));
 
+            string positional;
+            Collider positionalCollider;
+
+            if (BankCardHolsterMetadataNetwork.TryFindCardInBox(
+                    center,
+                    atm.transform.rotation,
+                    halfExtents,
+                    expectedCardId,
+                    out positional,
+                    out positionalCollider))
+            {
+                cardId = positional;
+                return true;
+            }
+
             Collider[] colliders = Physics.OverlapBox(
                 center,
                 halfExtents,
-                atm.transform.rotation);
+                atm.transform.rotation,
+                ~0,
+                QueryTriggerInteraction.Collide);
 
             if (colliders == null || colliders.Length == 0)
                 return false;

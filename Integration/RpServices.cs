@@ -518,7 +518,10 @@ namespace FusionDarkRP.Integration
 
                 Cooldown("mission|" + pid + "|" + request.A, MissionStepDelay);
 
-                return Ok("Mission démarrée. Suivez les consignes.");
+                MissionWorld.OnMissionStarted(sender, pid, request.A);
+
+                return Ok("Mission démarrée : suivez l'objectif affiché "
+                    + "dans les notifications (balises, objets à ramasser).");
             }
             catch (Exception exception)
             {
@@ -554,6 +557,14 @@ namespace FusionDarkRP.Integration
                     StringComparison.OrdinalIgnoreCase))
             {
                 return Fail("Cette mission n'est pas pour votre métier.");
+            }
+
+            // Les étapes sont suivies dans le monde (balises, objets) :
+            // plus de validation manuelle quand le suivi est actif.
+            if (MissionWorld.IsAutomatic(pid, request.A))
+            {
+                return Fail("Cette étape se valide en jeu : "
+                    + "suivez l'objectif (balise ou objets).");
             }
 
             // Anti-farm : un délai minimal entre deux validations.

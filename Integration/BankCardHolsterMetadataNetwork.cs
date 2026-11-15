@@ -109,6 +109,11 @@ namespace FusionDarkRP.Integration
         private static readonly Dictionary<ushort, int>
             EntityObjectIds = new Dictionary<ushort, int>();
 
+        // Racines des supports de carte vivants (détection par position,
+        // indépendante des colliders / déclencheurs / calques).
+        private static readonly Dictionary<int, GameObject>
+            ObjectRoots = new Dictionary<int, GameObject>();
+
         private static bool initialized;
 
         public static bool IsInitialized
@@ -183,6 +188,7 @@ namespace FusionDarkRP.Integration
                 Cards.Clear();
                 ObjectCardIds.Clear();
                 EntityObjectIds.Clear();
+                ObjectRoots.Clear();
             }
         }
 
@@ -391,6 +397,7 @@ namespace FusionDarkRP.Integration
 
                     ObjectCardIds[instanceId] = cardId;
                     EntityObjectIds[entity.ID] = instanceId;
+                    ObjectRoots[instanceId] = supportRoot;
                 }
 
                 error = null;
@@ -428,6 +435,8 @@ namespace FusionDarkRP.Integration
             {
                 ObjectCardIds.Remove(instanceId);
             }
+
+            ObjectRoots.Remove(instanceId);
         }
 
         private static void Broadcast(CardMetadata metadata)
@@ -552,6 +561,119 @@ namespace FusionDarkRP.Integration
                     + exception.Message
                 );
             }
+        }
+
+        /// <summary>
+        /// Cherche une carte bancaire dans une boîte orientée (fente du
+        /// distributeur) PAR POSITION : fonctionne même si les colliders de
+        /// la carte sont des déclencheurs, désactivés ou sur un autre calque.
+        /// </summary>
+        public static bool TryFindCardInBox(
+            Vector3 center,
+            Quaternion rotation,
+            Vector3 halfExtents,
+            string expectedCardId,
+            out string cardId,
+            out Collider cardCollider)
+        {
+            cardId = null;
+            cardCollider = null;
+
+            string firstId = null;
+            Collider firstCollider = null;
+
+            List<KeyValuePair<int, GameObject>> snapshot;
+
+            lock (Sync)
+                snapshot = new List<KeyValuePair<int, GameObject>>(ObjectRoots);
+
+            Quaternion inverse = Quaternion.Inverse(rotation);
+            Vector3 margin = new Vector3(0.03f, 0.03f, 0.03f);
+
+            foreach (KeyValuePair<int, GameObject> pair in snapshot)
+            {
+                GameObject root = pair.Value;
+
+                if (root == null)
+                    continue;
+
+                string id;
+
+                lock (Sync)
+                {
+                    if (!ObjectCardIds.TryGetValue(pair.Key, out id))
+                        continue;
+                }
+
+                Vector3 position = root.transform.position;
+                Collider found = null;
+
+                try
+                {
+                    Renderer[] renderers =
+                        root.GetComponentsInChildren<Renderer>(true);
+
+                    bool has = false;
+                    Bounds bounds = new Bounds(position, Vector3.zero);
+
+                    foreach (Renderer renderer in renderers)
+                    {
+                        if (renderer == null ||
+                            renderer.gameObject.name !=
+                            CarrierVisualAdapter.VisualObjectName)
+                        {
+                            continue;
+                        }
+
+                        if (!has)
+                        {
+                            bounds = renderer.bounds;
+                            has = true;
+                        }
+                        else
+                        {
+                            bounds.Encapsulate(renderer.bounds);
+                        }
+                    }
+
+                    if (has)
+                        position = bounds.center;
+
+                    found = root.GetComponentInChildren<Collider>(true);
+                }
+                catch
+                {
+                    // Utilise la position de la racine.
+                }
+
+                Vector3 local = inverse * (position - center);
+
+                if (Mathf.Abs(local.x) > halfExtents.x + margin.x ||
+                    Mathf.Abs(local.y) > halfExtents.y + margin.y ||
+                    Mathf.Abs(local.z) > halfExtents.z + margin.z)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(expectedCardId) &&
+                    string.Equals(id, expectedCardId,
+                        StringComparison.Ordinal))
+                {
+                    cardId = id;
+                    cardCollider = found;
+                    return true;
+                }
+
+                if (firstId == null)
+                {
+                    firstId = id;
+                    firstCollider = found;
+                }
+            }
+
+            cardId = firstId;
+            cardCollider = firstCollider;
+            return firstId != null;
         }
 
         public static bool TryGetCardId(

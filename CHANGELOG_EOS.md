@@ -67,3 +67,11 @@
 - Poussée au holster : colliders des visuels (objets porteurs et carte) passés en déclencheurs.
 - Selfie : MSAA 4x activé sur la caméra et ses textures (cheveux blancs).
 - Téléphone : fond d'écran par défaut = image « LA RUE RP » (accueil et écran verrouillé) tant qu'aucune photo n'est choisie.
+
+# 4.0.0 (non compilé ici — aucun SDK .NET dans le bac à sable ; d'après le journal 26-11-15_2-21-55)
+- **Carte et espèces qui ne s'insèrent plus** : depuis la 3.10.0 les colliders de la carte sont des déclencheurs, donc la fente du distributeur ne la « voyait » plus (et sans carte, le dépôt d'espèces est refusé). La détection se fait maintenant PAR POSITION (BankCardHolsterMetadataNetwork.TryFindCardInBox) côté joueur ET côté hôte, avec repli par colliders en `QueryTriggerInteraction.Collide`.
+- **Liasses de 50 billets** (au lieu de 100) : retrait au distributeur (bouton « MODE : LIASSES x50 »), sortie par le portefeuille (A fait défiler jusqu'aux liasses 5/10/20/50/100 €), dépôt/rangement comme les billets.
+- **Missions réelles** (Integration/MissionWorld.cs) : les 33 missions de tous les métiers ont un objectif dans le monde (balise à rejoindre, poste de travail, rencontre d'un autre joueur, objets à ramasser, briefing automatique). La validation manuelle est refusée quand le suivi est actif.
+  - Éboueur : une pince et un sac apparaissent ; des petits tas (modèle `PoopPile`) apparaissent ; les toucher avec la pince ou le sac les ramasse ; **5 € tous les 5**.
+- **Imprimante à billets** (modèle `MoneyPrinter`, Integration/MoneyPrinterService.cs) : imprime 25 € / 20 s dans son bac (1 000 € max) ; rester près du bac 1,5 s = récupérer ; un policier saisit (prime de 20 %).
+- **Modèles refaits** : radio de police (antenne, molettes, PTT, écran, clavier, clip), menottes (anneaux, serrures à cliquet, chaîne), porte de sécurité (volant, pênes, charnières, hublot), + `PoopPile`, `MissionMarker`, `MoneyPrinter`. Générés par `Tools/GenerateModelsV2.py`.

@@ -59,36 +59,36 @@ namespace FusionDarkRP.Economy
                 },
 
                 // LIASSES DE BILLETS
-                // Chaque liasse représente 100 billets.
+                // Chaque liasse représente 50 billets.
                 {
                     "Band_5EUR",
                     new PhysicalCashItem(
-                        "Band_5EUR", "Liasse de 5 € (100 billets)",
-                        50000, true)
+                        "Band_5EUR", "Liasse de 5 € (50 billets)",
+                        25000, true)
                 },
                 {
                     "Band_10EUR",
                     new PhysicalCashItem(
-                        "Band_10EUR", "Liasse de 10 € (100 billets)",
-                        100000, true)
+                        "Band_10EUR", "Liasse de 10 € (50 billets)",
+                        50000, true)
                 },
                 {
                     "Band_20EUR",
                     new PhysicalCashItem(
-                        "Band_20EUR", "Liasse de 20 € (100 billets)",
-                        200000, true)
+                        "Band_20EUR", "Liasse de 20 € (50 billets)",
+                        100000, true)
                 },
                 {
                     "Band_50EUR",
                     new PhysicalCashItem(
-                        "Band_50EUR", "Liasse de 50 € (100 billets)",
-                        500000, true)
+                        "Band_50EUR", "Liasse de 50 € (50 billets)",
+                        250000, true)
                 },
                 {
                     "Band_100EUR",
                     new PhysicalCashItem(
-                        "Band_100EUR", "Liasse de 100 € (100 billets)",
-                        1000000, true)
+                        "Band_100EUR", "Liasse de 100 € (50 billets)",
+                        500000, true)
                 },
 
                 // PIECES EURO
