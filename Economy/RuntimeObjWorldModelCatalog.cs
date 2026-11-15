@@ -212,6 +212,36 @@ namespace FusionDarkRP.Economy
                         WorldModelCategory.RpEquipment, false, true)
                 },
                 {
+                    "WeedPot1",
+                    new WorldModelDefinition(
+                        "WeedPot1", "Semis de cannabis",
+                        WorldModelCategory.RpEquipment, false, false)
+                },
+                {
+                    "WeedPot2",
+                    new WorldModelDefinition(
+                        "WeedPot2", "Cannabis en croissance",
+                        WorldModelCategory.RpEquipment, false, false)
+                },
+                {
+                    "WeedPot3",
+                    new WorldModelDefinition(
+                        "WeedPot3", "Cannabis mûr",
+                        WorldModelCategory.RpEquipment, false, false)
+                },
+                {
+                    "WeedBag",
+                    new WorldModelDefinition(
+                        "WeedBag", "Sachet de récolte",
+                        WorldModelCategory.RpEquipment, true, false)
+                },
+                {
+                    "TownTreasury",
+                    new WorldModelDefinition(
+                        "TownTreasury", "Trésor municipal",
+                        WorldModelCategory.BankStorage, false, true)
+                },
+                {
                     "BankSecurityDoorFrame",
                     new WorldModelDefinition(
                         "BankSecurityDoorFrame",

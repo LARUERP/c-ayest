@@ -117,6 +117,9 @@ namespace FusionDarkRP.Integration
 
             RpHub.RegisterHost("care.heal", CareHeal);
 
+            JobPerks.RegisterHandlers();
+            DrugFarmService.RegisterHandlers();
+
             RpHub.RegisterHost("admin.give", AdminGive);
             RpHub.RegisterHost("admin.balance", AdminBalance);
             RpHub.RegisterHost("admin.treasury", AdminTreasury);

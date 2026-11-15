@@ -492,6 +492,8 @@ namespace FusionDarkRP.Integration
             {
                 MissionWorld.Update();
                 MoneyPrinterService.Update();
+                JobPerks.Update();
+                DrugFarmService.Update();
             }
             catch (Exception exception)
             {
@@ -520,6 +522,8 @@ namespace FusionDarkRP.Integration
             {
                 MissionWorld.Reset();
                 MoneyPrinterService.Reset();
+                JobPerks.Reset();
+                DrugFarmService.Reset();
             }
             catch
             {

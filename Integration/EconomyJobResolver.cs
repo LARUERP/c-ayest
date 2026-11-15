@@ -52,6 +52,9 @@ namespace FusionDarkRP.Integration
                 case 10:
                     return "armurerie";
 
+                case 11:
+                    return "concessionnaire";
+
                 default:
                     return "citizen";
             }

@@ -294,6 +294,21 @@ namespace FusionDarkRP.Integration
         private const string SafeModel = "WallSafe";
 
         private const string VaultWalletId = "system:bank_vault";
+        private const string TreasuryModel = "TownTreasury";
+        private const string TreasuryWalletId = "system:town_treasury";
+
+        // Rang minimal (0 = premier grade) pour ouvrir les gros coffres :
+        // directeur adjoint / directeur / maire et adjoints.
+        private const int BossGradeIndex = 3;
+
+        private static readonly HashSet<string> TreasuryIds =
+            new HashSet<string>(StringComparer.Ordinal);
+
+        private static bool IsTreasuryId(string objectId)
+        {
+            lock (Sync)
+                return objectId != null && TreasuryIds.Contains(objectId);
+        }
 
         private const float ScanInterval = 1f;
         private const float MinimumRequestInterval = 0.25f;
@@ -463,6 +478,13 @@ namespace FusionDarkRP.Integration
             }
 
             if (string.Equals(
+                modelId, TreasuryModel, StringComparison.OrdinalIgnoreCase))
+            {
+                kind = SecurityKind.Vault;
+                return true;
+            }
+
+            if (string.Equals(
                 modelId, SafeModel, StringComparison.OrdinalIgnoreCase))
             {
                 kind = SecurityKind.Safe;
@@ -501,6 +523,13 @@ namespace FusionDarkRP.Integration
 
                 lock (Sync)
                 {
+                    if (string.Equals(
+                        modelId, TreasuryModel,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        TreasuryIds.Add(objectId);
+                    }
+
                     if (Objects.ContainsKey(objectId))
                         continue;
 
@@ -683,6 +712,7 @@ namespace FusionDarkRP.Integration
             public byte ForceBy = 255;
             public float ForceEnd;
             public bool Forcing;
+            public bool Treasury;
         }
 
         private static bool IsHost()
@@ -710,7 +740,8 @@ namespace FusionDarkRP.Integration
                     {
                         Kind = kind,
                         Open = false,
-                        Locked = kind != SecurityKind.Door
+                        Locked = kind != SecurityKind.Door,
+                        Treasury = TreasuryIds.Contains(objectId)
                     };
 
                     HostStates.Add(objectId, state);
@@ -744,6 +775,17 @@ namespace FusionDarkRP.Integration
 
             string job = EconomyJobResolver.GetJobIdFromPlayer(player);
 
+            if (state.Kind == SecurityKind.Vault)
+            {
+                // Coffre de la banque : patron banquier uniquement.
+                // Trésor municipal : maire et adjoints uniquement.
+                string wanted = state.Treasury ? "mairie" : "banque";
+
+                return string.Equals(job, wanted, StringComparison.Ordinal) &&
+                       EconomyJobResolver.GetGradeIndexFromPlayer(player)
+                           >= BossGradeIndex;
+            }
+
             return string.Equals(job, "banque", StringComparison.Ordinal) ||
                    string.Equals(job, "mairie", StringComparison.Ordinal);
         }
@@ -751,7 +793,7 @@ namespace FusionDarkRP.Integration
         private static string WalletFor(HostState state)
         {
             if (state.Kind == SecurityKind.Vault)
-                return VaultWalletId;
+                return state.Treasury ? TreasuryWalletId : VaultWalletId;
 
             if (state.Kind == SecurityKind.Safe &&
                 !string.IsNullOrEmpty(state.OwnerId))
@@ -1822,6 +1864,16 @@ namespace FusionDarkRP.Integration
 
                 string job = EconomyJobResolver.GetJobIdFromPlayer(local);
 
+                if (kind == SecurityKind.Vault)
+                {
+                    string wanted = IsTreasuryId(objectId)
+                        ? "mairie" : "banque";
+
+                    return job == wanted &&
+                           EconomyJobResolver.GetGradeIndexFromPlayer(local)
+                               >= BossGradeIndex;
+                }
+
                 return job == "banque" || job == "mairie";
             }
 
@@ -1851,7 +1903,9 @@ namespace FusionDarkRP.Integration
                 switch (kind)
                 {
                     case SecurityKind.Vault:
-                        return "COFFRE-FORT BANCAIRE";
+                        return IsTreasuryId(objectId)
+                            ? "TRESOR MUNICIPAL"
+                            : "COFFRE-FORT BANCAIRE";
                     case SecurityKind.Safe:
                         return "COFFRE MURAL";
                     default:

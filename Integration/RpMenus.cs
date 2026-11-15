@@ -69,6 +69,30 @@ namespace FusionDarkRP.Integration
                 "Missions de votre métier (voir Hiérarchies).",
                 Color.white, "[Fusion DarkRP]");
 
+            Page work = MenuKit.NewPage(main, "Mon métier : équipement", Color.green);
+
+            MenuKit.AddFunction(work, "Récupérer mon équipement de service", Color.green,
+                () => RpHub.Send("perk.kit"));
+            MenuKit.AddFunction(work, "Véhicule (service / gang / achat 400 EUR)", Color.cyan,
+                () => RpHub.Send("veh.spawn"));
+            MenuKit.AddInfo(work,
+                "Équipement et armes : donnés à l'embauche, retirés à la débauche.",
+                Color.white, "[Fusion DarkRP]");
+
+            Page farm = MenuKit.NewPage(main, "Gangs : culture et trafic", Color.magenta);
+
+            MenuKit.AddFunction(farm, "Planter du cannabis (40 EUR)", Color.green,
+                () => RpHub.Send("drug.plant"));
+            MenuKit.AddFunction(farm, "Récolter la plante proche", Color.yellow,
+                () => RpHub.Send("drug.harvest"));
+            MenuKit.AddFunction(farm, "Vendre mes sachets (à moins de 4 m)", Color.cyan,
+                () => RpHub.Send("drug.sell"));
+            MenuKit.AddFunction(farm, "Police : saisir plants et sachets proches", Color.blue,
+                () => RpHub.Send("drug.seize"));
+            MenuKit.AddInfo(farm,
+                "Semis -> croissance -> plante mûre (~5 min) -> 3 sachets à revendre.",
+                Color.white, "[Fusion DarkRP]");
+
             Page admin = MenuKit.NewPage(main, "Administration (hôte)", Color.red);
 
             MenuKit.AddFunction(admin, "Voir le trésor municipal", Color.yellow,
@@ -187,6 +211,7 @@ namespace FusionDarkRP.Integration
                 case "mairie": return "Demarche municipale";
                 case "eboueurs": return "Service de collecte";
                 case "gens_du_voyage": return "Commerce itinerant";
+                case "concessionnaire": return "Vente de vehicules";
                 default: return "Prestation";
             }
         }

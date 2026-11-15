@@ -75,10 +75,40 @@ namespace FusionDarkRP.Economy
             }
         }
 
+        // Grille de salaires (centimes) : base du 1er grade + palier par grade.
+        // Une entrée explicite dans economy-config.json garde la priorité.
+        private static readonly Dictionary<string, long[]> PayScale =
+            new Dictionary<string, long[]>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "eboueurs",       new[] { 3500L, 800L } },
+                { "epicerie",       new[] { 3800L, 1000L } },
+                { "concessionnaire",new[] { 4200L, 1400L } },
+                { "armurerie",      new[] { 4500L, 1300L } },
+                { "police",         new[] { 5000L, 1500L } },
+                { "mairie",         new[] { 5200L, 1800L } },
+                { "banque",         new[] { 5500L, 2000L } },
+                { "medecins",       new[] { 5500L, 2200L } },
+                { "marseillais",    new[] { 1500L, 1200L } },
+                { "parisiens",      new[] { 1500L, 1200L } },
+                { "gens_du_voyage", new[] { 1500L, 1000L } }
+            };
+
         public long GetSalary(string jobId, int gradeIndex)
         {
             lock (sync)
             {
+                long[] scale;
+
+                if (!string.IsNullOrWhiteSpace(jobId) &&
+                    PayScale.TryGetValue(jobId, out scale) &&
+                    !data.JobSalaries.Exists(item => item != null &&
+                        string.Equals(item.JobId, jobId,
+                            StringComparison.OrdinalIgnoreCase)))
+                {
+                    int grade = Math.Max(0, Math.Min(gradeIndex, MaximumGradeIndex));
+                    return scale[0] + grade * scale[1];
+                }
+
                 long baseSalary = GetBaseSalaryInternal(jobId);
 
                 if (string.Equals(

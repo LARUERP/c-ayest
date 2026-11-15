@@ -23,13 +23,13 @@ namespace FusionDarkRP.Integration
     public static class MissionWorld
     {
         private const float TickInterval = 0.4f;
-        private const float AutoSeconds = 4f;
-        private const float WorkSeconds = 10f;
-        private const float MeetSeconds = 6f;
+        private const float AutoSeconds = 6f;
+        private const float WorkSeconds = 25f;
+        private const float MeetSeconds = 12f;
         private const float MeetDistance = 3f;
         private const float MarkerRadius = 2.4f;
-        private const float GotoMinDistance = 22f;
-        private const float GotoMaxDistance = 32f;
+        private const float GotoMinDistance = 40f;
+        private const float GotoMaxDistance = 75f;
         private const long PoopBonusCents = 500L;
         private const float ToolReach = 0.45f;
 
@@ -64,6 +64,8 @@ namespace FusionDarkRP.Integration
             public float LastTick;
             public float NextNotice;
             public int Collected;
+            public int Spawned;
+            public int PoopTotal;
         }
 
         private static readonly Dictionary<string, Session> Sessions =
@@ -81,9 +83,9 @@ namespace FusionDarkRP.Integration
                 { "citizen_errand", new[] { "A", "C:ShopCrate:3", "G" } },
                 { "citizen_delivery", new[] { "C:ShopCrate:1", "G", "M" } },
                 { "citizen_social", new[] { "M", "W", "A" } },
-                { "eboueurs_route", new[] { "G", "C:PoopPile:5", "C:PoopPile:5", "G" } },
+                { "eboueurs_route", new[] { "G", "C:PoopPile:10", "C:PoopPile:10", "G" } },
                 { "eboueurs_sort", new[] { "C:TrashBag:2", "W", "W" } },
-                { "eboueurs_incident", new[] { "A", "C:PoopPile:5", "W" } },
+                { "eboueurs_incident", new[] { "A", "C:PoopPile:10", "W" } },
                 { "banque_customer", new[] { "A", "M", "W", "A" } },
                 { "banque_audit", new[] { "W", "W", "A" } },
                 { "banque_card", new[] { "M", "W", "A" } },
@@ -111,7 +113,10 @@ namespace FusionDarkRP.Integration
                 { "gens_du_voyage_route", new[] { "C:ShopCrate:2", "G", "A" } },
                 { "armurerie_counter", new[] { "A", "W", "M" } },
                 { "armurerie_stock", new[] { "W", "W", "A" } },
-                { "armurerie_order", new[] { "A", "W", "C:ShopCrate:2" } }
+                { "armurerie_order", new[] { "A", "W", "C:ShopCrate:2" } },
+                { "conc_sale", new[] { "A", "G", "M" } },
+                { "conc_delivery", new[] { "W", "G", "M" } },
+                { "conc_inventory", new[] { "W", "W", "A" } }
             };
 
         private static Spec ParseSpec(string missionId, int step)
@@ -139,7 +144,7 @@ namespace FusionDarkRP.Integration
                     {
                         Kind = Kind.Collect,
                         Model = part[1],
-                        Count = Mathf.Clamp(count, 1, 6)
+                        Count = Mathf.Clamp(count, 1, 12)
                     };
                 default: return new Spec { Kind = Kind.Auto };
             }
@@ -400,6 +405,7 @@ namespace FusionDarkRP.Integration
             session.LastTick = Time.unscaledTime;
             session.Progress = 0f;
             session.Collected = 0;
+            session.Spawned = 0;
             session.NextNotice = 0f;
 
             MissionStepDefinition info = definition.Steps[step];
@@ -472,8 +478,12 @@ namespace FusionDarkRP.Integration
                     session.Tools.Add(bag);
             }
 
-            for (int i = 0; i < session.Spec.Count; i++)
+            int wave = Mathf.Min(session.Spec.Count, 5);
+
+            for (int i = 0; i < wave; i++)
             {
+                session.Spawned++;
+
                 Vector3 position = PickPoint(
                     body,
                     3.5f + UnityEngine.Random.value * 4.5f,
@@ -639,34 +649,58 @@ namespace FusionDarkRP.Integration
                 session.Props.RemoveAt(i);
                 session.Collected++;
 
+                if (trash)
+                {
+                    session.PoopTotal++;
+
+                    // 5 EUR tous les 5 déchets ramassés.
+                    if (session.PoopTotal % 5 == 0)
+                    {
+                        string payError;
+
+                        if (runtime.Wallets.TryGiveCash(
+                                true,
+                                "poop:" + session.PlayerKey + ":"
+                                    + Guid.NewGuid().ToString("N"),
+                                session.PlayerKey,
+                                PoopBonusCents,
+                                out payError))
+                        {
+                            Say(player, "+" + BankService.FormatAmount(
+                                PoopBonusCents) + " (5 déchets ramassés).", 1);
+                        }
+                    }
+                }
+
+                // Nouvelle vague : jamais plus de 5 déchets à l'écran.
+                if (session.Spawned < session.Spec.Count)
+                {
+                    session.Spawned++;
+
+                    Vector3 again = PickPoint(
+                        body,
+                        3.5f + UnityEngine.Random.value * 4.5f,
+                        UnityEngine.Random.Range(-70f, 70f))
+                        + Vector3.up * 0.12f;
+
+                    string newId = SpawnProp(session.Spec.Model, again);
+
+                    if (newId != null)
+                    {
+                        session.Props.Add(new Prop
+                        {
+                            Id = newId,
+                            Start = again
+                        });
+                    }
+                }
+
                 Say(player, (trash ? "Déchets ramassés : " : "Objets : ")
                     + session.Collected + "/" + session.Spec.Count, 0);
             }
 
             if (session.Collected < session.Spec.Count)
                 return false;
-
-            if (trash)
-            {
-                string error;
-
-                if (runtime.Wallets.TryGiveCash(
-                        true,
-                        "poop:" + session.PlayerKey + ":" + Guid.NewGuid().ToString("N"),
-                        session.PlayerKey,
-                        PoopBonusCents,
-                        out error))
-                {
-                    Say(player, "+" + BankService.FormatAmount(PoopBonusCents)
-                        + " : " + session.Spec.Count
-                        + " déchets ramassés.", 1);
-                }
-                else
-                {
-                    MelonLogger.Warning(
-                        "[FusionDarkRP Missions] Prime déchets : " + error);
-                }
-            }
 
             return true;
         }

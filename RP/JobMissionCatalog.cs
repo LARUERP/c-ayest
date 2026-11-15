@@ -44,14 +44,44 @@ namespace FusionDarkRP.RP
             }).ToArray();
         }
 
+        // Ancienne échelle (2 500 à 13 000) ramenée à 40–500 EUR, pondérée par
+        // le métier : le travail pénible/risqué paie plus, le service de base moins.
+        private static long Rebalance(string job, int legacy)
+        {
+            double factor;
+
+            switch (job)
+            {
+                case "citizen": factor = 0.55; break;
+                case "eboueurs": factor = 0.70; break;
+                case "epicerie": factor = 0.75; break;
+                case "gens_du_voyage": factor = 0.80; break;
+                case "concessionnaire": factor = 0.90; break;
+                case "marseillais":
+                case "parisiens": factor = 0.90; break;
+                case "mairie": factor = 0.90; break;
+                case "armurerie": factor = 0.95; break;
+                case "police": factor = 0.95; break;
+                default: factor = 1.00; break;
+            }
+
+            double euros = (60.0 + (legacy - 2500) * 0.0419) * factor;
+            long rounded = (long)(Math.Round(euros / 5.0) * 5.0);
+
+            if (rounded < 40L) rounded = 40L;
+            if (rounded > 500L) rounded = 500L;
+
+            return rounded * 100L;
+        }
+
         private static JobMissionDefinition Mission(string id, string job, string title,
             string briefing, int reward, int rep, params (string, string, string)[] steps)
         {
             return new JobMissionDefinition
             {
                 Id = id, JobId = job, Title = title, Briefing = briefing,
-                RewardCents = checked((long)reward * 100L),
-                ReputationReward = rep, CooldownMinutes = 5, Steps = Steps(steps)
+                RewardCents = Rebalance(job, reward),
+                ReputationReward = rep, CooldownMinutes = 10, Steps = Steps(steps)
             };
         }
 
@@ -204,7 +234,20 @@ namespace FusionDarkRP.RP
             Mission("armurerie_order","armurerie","Commande fournisseur","Préparer et réceptionner une commande.",11000,7,
                 ("catalog","Consulter le catalogue","Vérifier les références."),
                 ("order","Commander","Créer la commande."),
-                ("receive","Réceptionner","Contrôler la livraison."))
+                ("receive","Réceptionner","Contrôler la livraison.")),
+
+            Mission("conc_sale","concessionnaire","Vente d'un véhicule","Accueillir un client, essayer le véhicule, signer.",9000,6,
+                ("welcome","Accueillir le client","Prendre contact et présenter le véhicule."),
+                ("testdrive","Essai routier","Rejoindre le point d'essai."),
+                ("contract","Signer le contrat","Finaliser la vente avec le client.")),
+            Mission("conc_delivery","concessionnaire","Livraison de véhicule","Préparer un véhicule et le remettre à son acheteur.",8000,5,
+                ("prepare","Préparer le véhicule","Contrôler et nettoyer le véhicule."),
+                ("deliver","Convoyage","Rejoindre l'adresse de livraison."),
+                ("handover","Remise des clés","Remettre les clés à l'acheteur.")),
+            Mission("conc_inventory","concessionnaire","Inventaire du parc","Vérifier l'état et le stock du parc automobile.",7500,5,
+                ("count","Compter les véhicules","Faire le tour du parc."),
+                ("check","Contrôler l'état","Vérifier chaque véhicule."),
+                ("report","Rapport","Remettre le rapport."))
         };
 
         public static IReadOnlyList<JobMissionDefinition> AllMissions { get { return missions; } }

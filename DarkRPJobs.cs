@@ -104,7 +104,17 @@ namespace FusionDarkRP
                     "MaitreArmurier",
                     "DirecteurArmurerie"
                 },
-                new byte[] { 36, 37, 38, 39, 40 })
+                new byte[] { 36, 37, 38, 39, 40 }),
+
+            new DarkRPJob(11, "Concessionnaire", "Concession automobile",
+                new[] {
+                    "ConcVendeur",
+                    "ConcConseiller",
+                    "ConcChefVente",
+                    "ConcDirecteur",
+                    "ConcPatron"
+                },
+                new byte[] { 41, 42, 43, 44, 45 })
         };
 
         public static int Count
@@ -274,6 +284,15 @@ namespace FusionDarkRP
                         "Armurier confirmé",
                         "Maître armurier",
                         "Directeur de l'armurerie"
+                    }[rank];
+
+                case 11:
+                    return new[] {
+                        "Vendeur automobile",
+                        "Conseiller de vente",
+                        "Chef des ventes",
+                        "Directeur de concession",
+                        "Patron de concession"
                     }[rank];
 
                 default:
