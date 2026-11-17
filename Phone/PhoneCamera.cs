@@ -8,6 +8,21 @@ using UnityEngine;
 
 namespace FusionDarkRP.Telephone;
 
+/// <summary>
+/// Caméra du téléphone (photo, aperçu, visio).
+///
+/// Correctif « écran noir » : sur Quest, une caméra secondaire rendue dans une
+/// RenderTexture MSAA, ou créée « à froid » sans les réglages de la caméra du
+/// joueur, donne parfois une image entièrement noire. Cette version :
+///  - n'utilise plus de MSAA sur les RenderTextures ;
+///  - contrôle chaque image (échantillons de pixels) et, si elle est noire,
+///    bascule automatiquement vers une stratégie de repli puis REFAIT le rendu ;
+///  - journalise la stratégie retenue (« Caméra téléphone : stratégie N ») pour
+///    qu'on sache laquelle fonctionne sur le casque.
+/// Stratégies : 0 = caméra activée (rendu normal de l'image) ;
+///              1 = Render() explicite avec les réglages de la caméra du joueur ;
+///              2 = Render() explicite, fond uni, tous les calques.
+/// </summary>
 public sealed class PhoneCamera : IDisposable
 {
     private GameObject go;
@@ -17,8 +32,12 @@ public sealed class PhoneCamera : IDisposable
     private RenderTexture photo;
     private Texture2D smallPixels;
     private Texture2D largePixels;
+    private Texture2D probePixels;
     private bool disposed;
     private readonly Action<string> warn;
+
+    private int strategy;
+    private int probes;
 
     public bool Busy { get; private set; }
     public RenderTexture Preview => preview;
@@ -27,6 +46,60 @@ public sealed class PhoneCamera : IDisposable
     public PhoneCamera(Action<string> warn)
     {
         this.warn = warn;
+    }
+
+    private static RenderTexture NewTexture(int width, int height)
+    {
+        RenderTexture texture = new RenderTexture(width, height, 24, (RenderTextureFormat)0);
+        texture.antiAliasing = 1;
+        texture.useMipMap = false;
+        texture.autoGenerateMips = false;
+        texture.filterMode = FilterMode.Bilinear;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        texture.Create();
+        return texture;
+    }
+
+    private void ApplyStrategy()
+    {
+        camera.stereoTargetEye = (StereoTargetEyeMask)0;
+        camera.fieldOfView = 70f;
+        camera.nearClipPlane = 0.04f;
+        camera.farClipPlane = 200f;
+        camera.allowHDR = false;
+        camera.allowMSAA = false;
+        camera.useOcclusionCulling = false;
+        camera.depth = -50f;
+        camera.rect = new Rect(0f, 0f, 1f, 1f);
+
+        Camera main = Camera.main;
+
+        if (strategy == 1 && main != null)
+        {
+            // Reprend skybox, fond et paramètres de la caméra du joueur.
+            camera.CopyFrom(main);
+
+            camera.stereoTargetEye = (StereoTargetEyeMask)0;
+            camera.fieldOfView = 70f;
+            camera.nearClipPlane = 0.04f;
+            camera.farClipPlane = 200f;
+            camera.allowHDR = false;
+            camera.allowMSAA = false;
+            camera.depth = -50f;
+            camera.rect = new Rect(0f, 0f, 1f, 1f);
+            camera.cullingMask = main.cullingMask & ~(1 << 5);
+        }
+        else if (strategy >= 2)
+        {
+            camera.clearFlags = (CameraClearFlags)2;
+            camera.backgroundColor = new Color(0.18f, 0.2f, 0.24f, 1f);
+            camera.cullingMask = -1 & ~(1 << 5);
+        }
+        else
+        {
+            camera.cullingMask = -33;
+            camera.clearFlags = (CameraClearFlags)1;
+        }
     }
 
     public bool Capture(
@@ -50,53 +123,48 @@ public sealed class PhoneCamera : IDisposable
         {
             go = new GameObject("RP_LocalPhoneCamera");
             camera = go.AddComponent<Camera>();
-
             camera.enabled = false;
-            camera.stereoTargetEye = (StereoTargetEyeMask)0;
-            camera.fieldOfView = 70f;
-            camera.nearClipPlane = 0.04f;
-            camera.farClipPlane = 200f;
-            camera.cullingMask = -33;
-            camera.clearFlags = (CameraClearFlags)1;
-            camera.allowHDR = false;
-            camera.allowMSAA = true;
 
-            preview = new RenderTexture(320, 240, 24, (RenderTextureFormat)0);
-            preview.antiAliasing = 4;
-            preview.Create();
-
-            live = new RenderTexture(320, 240, 24, (RenderTextureFormat)0);
-            live.antiAliasing = 4;
-            live.Create();
+            preview = NewTexture(320, 240);
+            live = NewTexture(320, 240);
 
             smallPixels = new Texture2D(320, 240, (TextureFormat)3, false);
+            probePixels = new Texture2D(16, 16, (TextureFormat)3, false);
         }
 
         if (large && photo == null)
         {
-            photo = new RenderTexture(640, 480, 24, (RenderTextureFormat)0);
-            photo.antiAliasing = 4;
-            photo.Create();
-
+            photo = NewTexture(640, 480);
             largePixels = new Texture2D(640, 480, (TextureFormat)3, false);
+        }
+
+        RenderTexture target = large ? photo : (photoPreview ? preview : live);
+
+        if (target != null && !target.IsCreated())
+        {
+            target.Create();
         }
 
         Transform cameraPose = screen.CameraPose;
         Vector3 direction = front ? -cameraPose.forward : cameraPose.forward;
 
+        ApplyStrategy();
+
         camera.transform.position = cameraPose.position + direction * 0.05f;
         camera.transform.rotation = Quaternion.LookRotation(direction, cameraPose.up);
 
-        camera.targetTexture = large ? photo : (photoPreview ? preview : live);
+        camera.targetTexture = target;
         camera.aspect = 1.3333334f;
 
         Busy = true;
-        camera.enabled = true;
+
+        // Stratégie 0 : la caméra est rendue par le moteur à la fin de cette image.
+        // Stratégies 1 et 2 : rendu explicite dans ReadFrame.
+        camera.enabled = strategy == 0;
 
         try
         {
-            MelonCoroutines.Start(
-                ReadFrame(large, encode, completed, camera.targetTexture));
+            MelonCoroutines.Start(ReadFrame(large, encode, completed, target));
         }
         catch
         {
@@ -106,6 +174,49 @@ public sealed class PhoneCamera : IDisposable
         }
 
         return true;
+    }
+
+    /// <summary>Vrai si l'image contient du « vrai » contenu (pas uniquement du noir).</summary>
+    private bool HasContent(RenderTexture target)
+    {
+        if (target == null || probePixels == null)
+        {
+            return true;
+        }
+
+        RenderTexture previous = RenderTexture.active;
+
+        try
+        {
+            RenderTexture.active = target;
+
+            float[] xs = { 0.5f, 0.25f, 0.75f, 0.5f, 0.5f };
+            float[] ys = { 0.5f, 0.5f, 0.5f, 0.25f, 0.75f };
+
+            for (int i = 0; i < xs.Length; i++)
+            {
+                float x = Mathf.Clamp(target.width * xs[i] - 8f, 0f, target.width - 16f);
+                float y = Mathf.Clamp(target.height * ys[i] - 8f, 0f, target.height - 16f);
+
+                probePixels.ReadPixels(new Rect(x, y, 16f, 16f), 0, 0, false);
+
+                var pixels = probePixels.GetPixels32();
+
+                for (int p = 0; p < pixels.Length; p += 3)
+                {
+                    if (pixels[p].r > 6 || pixels[p].g > 6 || pixels[p].b > 6)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        finally
+        {
+            RenderTexture.active = previous;
+        }
     }
 
     private IEnumerator ReadFrame(
@@ -125,6 +236,36 @@ public sealed class PhoneCamera : IDisposable
         try
         {
             camera.enabled = false;
+            camera.targetTexture = target;
+
+            if (strategy >= 1)
+            {
+                camera.Render();
+            }
+
+            // Contrôle d'image noire : toujours pour une photo, puis sur les
+            // premières images de l'aperçu / de la visio.
+            if (strategy < 2 && (encode || probes < 8))
+            {
+                probes++;
+
+                if (!HasContent(target))
+                {
+                    strategy++;
+
+                    warn?.Invoke(
+                        "Caméra téléphone : image noire, bascule vers la stratégie "
+                        + strategy + ".");
+
+                    ApplyStrategy();
+                    camera.targetTexture = target;
+                    camera.Render();
+                }
+                else if (probes == 1)
+                {
+                    warn?.Invoke("Caméra téléphone : stratégie " + strategy + " active.");
+                }
+            }
 
             if (!encode)
             {
@@ -233,6 +374,11 @@ public sealed class PhoneCamera : IDisposable
             UnityEngine.Object.Destroy(largePixels);
         }
 
+        if (probePixels != null)
+        {
+            UnityEngine.Object.Destroy(probePixels);
+        }
+
         camera = null;
         go = null;
         preview = null;
@@ -240,5 +386,6 @@ public sealed class PhoneCamera : IDisposable
         photo = null;
         smallPixels = null;
         largePixels = null;
+        probePixels = null;
     }
 }

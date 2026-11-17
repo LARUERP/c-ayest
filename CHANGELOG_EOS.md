@@ -1,7 +1,66 @@
-## 5.0.1 (correctif de compilation)
-- GameItemService.cs : ajout de `using LabFusion.RPC;` (NetworkAssetSpawner introuvable, erreurs CS0246 / CS0103 aux lignes 202-203 et 269-270).
-- PlacementPreview.cs : suppression du champ inutilisé `notifyAt` (avertissement CS0414).
-- Non compilé ici (pas de SDK .NET dans l'environnement) : à valider par GitHub Actions.
+# 5.4.0 (non compilé ici : aucun SDK .NET dans le bac à sable ; à valider par GitHub Actions puis en jeu)
+
+## Véhicules : vente directe par le concessionnaire (plus de menu d'achat)
+- Plus aucun véhicule de métier ni menu « acheter » : le concessionnaire choisit Joueurs connectés > client > Actions RP > Vendre un véhicule
+  (client à moins de 8 m, nouvelle commande hôte `veh.sell`). Une offre apparaît dans les Factures du client ; au paiement, contrôles (concessionnaire toujours
+  en service, véhicule installé, fonds en banque ou en liquide, position), paiement (15 % au concessionnaire, reste au trésor) puis apparition du véhicule devant le client.
+  Rien n'est débité si un contrôle échoue. Commandes `veh.spawn` et `veh.list` supprimées.
+- `JobVehicleCatalog.ForJob` ne propose que les véhicules à l'achat, même avec un ancien vehicles.json.
+- Correction de cohérence : le trésor municipal avait deux identifiants (`system:treasury` dans RpServices : amendes, primes, « Voir le trésor » ; `system:town_treasury`
+  ailleurs : véhicules, semis, coffre du trésor). Tout utilise désormais `system:town_treasury`. L'ancien solde éventuel de `system:treasury` n'est pas migré.
+
+## Modèles 3D refaits (Tools/GenerateModelsV6.py ; mêmes noms, origine et orientation conservées)
+- PoliceCuffs : deux bracelets à crémaillère, boîtier à double verrou + trou de clé, chaîne de 4 maillons croisés.
+- PoliceBadge (insigne bouclier avec liseré, étoile, anneau), TownBadge (médaille + ruban tricolore), PoliceNotepad (spirale, élastique, stylo),
+  TownFolder (dossier à sangles), ArmoryCatalog (classeur à anneaux, couverture illustrée), MedicalKit (mallette rigide, fermoirs, poignée, croix des deux côtés),
+  Defibrillator (écran, bouton de choc, électrodes + câble), BankTerminal (écran, clavier, NFC), ShopScanner, TrashGrabber (pince à gâchette et mâchoires), BusinessTablet.
+- Cannabis (Tools/GenerateModelsV5.py) : plants refaits en 3 stades (voir 5.1.1).
+- Textures ajoutées : Terminal_UI, Nfc_Icon, Catalog_Cover, Folder_Cover, Weed_Leaf.
+
+# 5.1.1 — cannabis refait (modèles seulement ; aucun code C# modifié)
+- WeedPot1/2/3 régénérés (Tools/GenerateModelsV5.py) : pot de pépinière noir + soucoupe + cailloux de drainage, tuteur, tige effilée,
+  feuilles palmées à folioles dentées et nervurées (texture Weed_Leaf.png), colas avec calices, pistils orangés et cristaux.
+  Stade 3 : 4 526 triangles (6 680 avant), stade 2 : 2 298, stade 1 : 1 094. Mêmes noms de modèles : remplacement direct.
+- Aucune modification des véhicules ni du code : base = archive 5.1.0.
+
+# 5.1.0 (non compilé ici — aucun SDK .NET dans le bac à sable ; à valider par GitHub Actions puis en jeu)
+
+## Correctifs de compilation (build #12)
+- GameItemService.cs : `using LabFusion.RPC;` (NetworkAssetSpawner introuvable, lignes 202-203 / 269-270).
+- PlacementPreview.cs : champ inutilisé `notifyAt` supprimé.
+
+## Missions : plus jamais de mission « fantôme »
+- Une mission non terminée n'est JAMAIS reprise après un redémarrage (MissionRuntime.Load les abandonne).
+- Fin de session / hôte qui quitte : toutes les missions en cours sont abandonnées et leurs objets/balises détruits.
+- Balayage toutes les 0,4 s : mission abandonnée si le joueur est parti, a changé de métier, ou dépasse 40 min.
+- Nouveau bouton « Abandonner la mission » (BoneMenu) + requête hôte `mission.abandon`.
+
+## Véhicules par métier (vrais noms : Clio, TMAX, Mégane, Trafic, Master…)
+- Nouveau catalogue RP/JobVehicleCatalog.cs : police (Clio, Mégane, 308, TMAX, Trafic), médecins (ambulance, Master, TMAX),
+  éboueurs (camion-benne, Kangoo), mairie, banque, épicerie, armurerie, concessionnaire (démonstration), gangs, civils (achat).
+- BONELAB ne contient pas ces modèles : ils sont cherchés par titre parmi les mods de véhicules installés.
+  Liste modifiable sans recompiler : UserData/FusionDarkRP/vehicles.json (créé au premier lancement) ; titres disponibles
+  dans UserData/FusionDarkRP/spawnable-titles.txt.
+- Le véhicule doit exister AVANT tout paiement ; menu « Véhicules de mon métier » (requête `veh.list`), [non installé] signalé.
+
+## Coffre mural PHYSIQUE (coffre de la ville et coffres de banque inchangés)
+- Nouveaux modèles (Tools/GenerateModelsV4.py) : WallSafe (corps creux, étagère, clavier) + WallSafeDoor (porte sur charnière).
+- Clavier 3D : visez la touche avec la main, gâchette = appui. 0-9, « * » efface (maintenu 2,5 s coffre déverrouillé : libère le
+  coffre), « # » valide. Code de 4 à 6 chiffres ; premier code saisi = réservation du coffre.
+- Poignée : saisir (gâchette) puis tirer/pousser ; la porte suit la main, est synchronisée, se reverrouille 2 s après fermeture.
+- 3 erreurs de code = clavier bloqué 60 s + alerte. Code haché (SHA-256 + sel) ; propriétaire et code sauvegardés dans
+  UserData/FusionDarkRP/wall-safes.json (clé = position arrondie à 25 cm).
+- Stockage RÉEL : les objets posés dans la cavité y restent (la porte a une collision). L'ancien solde virtuel d'un coffre est
+  versé en liquide à son propriétaire au premier déverrouillage. Plus de panneau laser sur ce coffre.
+- Réglage : MelonPreferences « SafeDoorDirection » (1 ou -1) si la porte s'ouvre du mauvais côté.
+
+## Téléphone : écran noir (photos, aperçu, appels vidéo)
+- PhoneCamera : RenderTextures sans MSAA, contrôle d'image noire et repli automatique (stratégies 0/1/2), rendu refait.
+  Le journal indique « Caméra téléphone : stratégie N active » ou « image noire, bascule vers la stratégie N ».
+
+## Cartes bancaires nominatives
+- Une carte est dédiée à un personnage (titulaire + nom). Délivrer une nouvelle carte invalide l'ancienne du même titulaire.
+- ATM : message explicite « Carte nominative : elle appartient à X » quand ce n'est pas la bonne personne.
 
 # 3.0.1 — compatibilité LabFusion EOS (non compilé ici)
 - PlatformIds.cs : Steam (ulong) et EOS (string) gérés sans recompiler ; 31 fichiers adaptés.

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using BoneLib.BoneMenu;
 using FusionDarkRP.Economy;
+using FusionDarkRP.RP;
 using LabFusion.Network;
 using LabFusion.Player;
 using MelonLoader;
@@ -73,8 +74,6 @@ namespace FusionDarkRP.Integration
 
             MenuKit.AddFunction(work, "Récupérer mon équipement de service", Color.green,
                 () => RpHub.Send("perk.kit"));
-            MenuKit.AddFunction(work, "Véhicule (service / gang / achat 400 EUR)", Color.cyan,
-                () => RpHub.Send("veh.spawn"));
             MenuKit.AddInfo(work,
                 "Équipement et armes : donnés à l'embauche, retirés à la débauche.",
                 Color.white, "[Fusion DarkRP]");
@@ -132,6 +131,28 @@ namespace FusionDarkRP.Integration
                             "invoice.create", InvoiceLabel(), cents, target));
                 }
 
+                if (IsLocalDealer())
+                {
+                    Page sell = MenuKit.NewPage(actions, "Vendre un véhicule", Color.cyan);
+
+                    foreach (VehicleDefinition vehicle in JobVehicleCatalog.ForJob("concessionnaire", 0))
+                    {
+                        string vehicleId = vehicle.Id;
+
+                        MenuKit.AddFunction(
+                            sell,
+                            vehicle.Name + " : " + BankService.FormatAmount(
+                                JobVehicleCatalog.EffectivePrice(vehicle)),
+                            Color.cyan,
+                            () => RpHub.Send("veh.sell", vehicleId, 0, target));
+                    }
+
+                    MenuKit.AddInfo(sell,
+                        "Le client doit être à moins de 8 m. Il reçoit une offre à payer (menu Factures) ; "
+                        + "le véhicule apparaît devant lui au paiement.",
+                        Color.white, "[Fusion DarkRP]");
+                }
+
                 Page police = MenuKit.NewPage(actions, "Police", Color.blue);
 
                 foreach (long amount in FineAmounts)
@@ -183,6 +204,21 @@ namespace FusionDarkRP.Integration
 
                 MenuKit.AddFunction(admin, "Donner 1000 EUR", Color.green,
                     () => RpHub.Send("admin.give", null, 100000, target));
+            }
+        }
+
+        private static bool IsLocalDealer()
+        {
+            try
+            {
+                PlayerID local = PlayerIDManager.LocalID;
+
+                return local != null && local.IsValid &&
+                    EconomyJobResolver.GetJobIdFromPlayer(local) == "concessionnaire";
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -272,7 +308,8 @@ namespace FusionDarkRP.Integration
                 RpHub.Notify(response.Msg, (byte)(response.Ok ? 1 : 2));
 
                 if (response.K == "mission.start" ||
-                    response.K == "mission.advance")
+                    response.K == "mission.advance" ||
+                    response.K == "mission.abandon")
                 {
                     RpHub.Send("mission.list");
                 }
@@ -385,6 +422,12 @@ namespace FusionDarkRP.Integration
                         "Valider l'étape " + (m.Step + 1) + "/" + m.Steps.Length,
                         Color.green,
                         () => RpHub.Send("mission.advance", m.Id));
+
+                    MenuKit.AddFunction(
+                        page,
+                        "Abandonner la mission",
+                        Color.red,
+                        () => RpHub.Send("mission.abandon", m.Id));
                 }
                 else
                 {

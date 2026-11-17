@@ -1,38 +1,74 @@
 newmtl Body
 Ka 0.20 0.20 0.20
-Kd 0.100 0.100 0.120
+Kd 0.120 0.130 0.150
 Ks 0.50 0.50 0.50
-Ns 450.0
+Ns 600.0
+Pm 0.30
+d 1.00
+illum 2
+
+newmtl Window
+Ka 0.20 0.20 0.20
+Kd 0.030 0.030 0.040
+Ks 0.50 0.50 0.50
+Ns 900.0
 Pm 0.00
 d 1.00
 illum 2
 
-newmtl Head
+newmtl Beam
 Ka 0.20 0.20 0.20
-Kd 0.140 0.140 0.170
+Kd 0.900 0.050 0.050
 Ks 0.50 0.50 0.50
-Ns 500.0
+Ns 800.0
+Pm 0.00
+Ke 0.900 0.050 0.050
+d 0.92
+illum 2
+
+newmtl Grip
+Ka 0.20 0.20 0.20
+Kd 0.060 0.060 0.070
+Ks 0.50 0.50 0.50
+Ns 120.0
 Pm 0.00
 d 1.00
 illum 2
 
 newmtl Trigger
 Ka 0.20 0.20 0.20
-Kd 0.800 0.150 0.120
+Kd 0.850 0.500 0.100
 Ks 0.50 0.50 0.50
-Ns 450.0
+Ns 400.0
 Pm 0.00
 d 1.00
 illum 2
 
-newmtl Window
+newmtl Dark
 Ka 0.20 0.20 0.20
-Kd 0.900 0.100 0.080
+Kd 0.020 0.020 0.025
 Ks 0.50 0.50 0.50
-Ns 800.0
+Ns 200.0
 Pm 0.00
-Ke 0.900 0.100 0.080
-map_Kd Screen_Glow.png
+d 1.00
+illum 2
+
+newmtl Led
+Ka 0.20 0.20 0.20
+Kd 0.100 0.900 0.300
+Ks 0.50 0.50 0.50
+Ns 900.0
+Pm 0.00
+Ke 0.100 0.900 0.300
+d 1.00
+illum 2
+
+newmtl Cable
+Ka 0.20 0.20 0.20
+Kd 0.030 0.030 0.035
+Ks 0.50 0.50 0.50
+Ns 250.0
+Pm 0.00
 d 1.00
 illum 2
 

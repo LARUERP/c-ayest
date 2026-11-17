@@ -1,28 +1,55 @@
-newmtl Front
+newmtl Rim
 Ka 0.20 0.20 0.20
-Kd 1.000 1.000 1.000
+Kd 0.820 0.680 0.260
 Ks 0.50 0.50 0.50
-Ns 700.0
-Pm 0.80
-map_Kd Town_Emblem.png
+Ns 900.0
+Pm 1.00
 d 1.00
 illum 2
 
 newmtl Back
 Ka 0.20 0.20 0.20
-Kd 0.700 0.580 0.250
+Kd 0.450 0.380 0.160
 Ks 0.50 0.50 0.50
-Ns 600.0
-Pm 1.00
+Ns 300.0
+Pm 0.60
 d 1.00
 illum 2
 
-newmtl Rim
+newmtl Face
 Ka 0.20 0.20 0.20
-Kd 0.800 0.660 0.280
+Kd 1.000 1.000 1.000
 Ks 0.50 0.50 0.50
 Ns 700.0
-Pm 1.00
+Pm 0.40
+map_Kd Town_Emblem.png
+d 1.00
+illum 2
+
+newmtl Blue
+Ka 0.20 0.20 0.20
+Kd 0.080 0.200 0.620
+Ks 0.50 0.50 0.50
+Ns 60.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl White
+Ka 0.20 0.20 0.20
+Kd 0.940 0.940 0.950
+Ks 0.50 0.50 0.50
+Ns 60.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Red
+Ka 0.20 0.20 0.20
+Kd 0.780 0.100 0.120
+Ks 0.50 0.50 0.50
+Ns 60.0
+Pm 0.00
 d 1.00
 illum 2
 

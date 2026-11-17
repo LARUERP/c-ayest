@@ -1,9 +1,27 @@
 newmtl Body
 Ka 0.20 0.20 0.20
-Kd 0.090 0.100 0.120
+Kd 0.100 0.110 0.130
 Ks 0.50 0.50 0.50
 Ns 600.0
-Pm 0.60
+Pm 0.50
+d 1.00
+illum 2
+
+newmtl Foot
+Ka 0.20 0.20 0.20
+Kd 0.050 0.050 0.060
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Bezel
+Ka 0.20 0.20 0.20
+Kd 0.020 0.020 0.025
+Ks 0.50 0.50 0.50
+Ns 600.0
+Pm 0.00
 d 1.00
 illum 2
 
@@ -14,15 +32,24 @@ Ks 0.50 0.50 0.50
 Ns 900.0
 Pm 0.00
 Ke 0.350 0.450 0.600
-map_Kd Tablet_UI.png
+map_Kd Terminal_UI.png
 d 1.00
 illum 2
 
-newmtl Keys
+newmtl KeyBody
+Ka 0.20 0.20 0.20
+Kd 0.780 0.800 0.840
+Ks 0.50 0.50 0.50
+Ns 250.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Key
 Ka 0.20 0.20 0.20
 Kd 1.000 1.000 1.000
 Ks 0.50 0.50 0.50
-Ns 400.0
+Ns 250.0
 Pm 0.00
 map_Kd Keypad.png
 d 1.00
@@ -30,9 +57,37 @@ illum 2
 
 newmtl Slot
 Ka 0.20 0.20 0.20
-Kd 0.020 0.020 0.020
+Kd 0.010 0.010 0.012
 Ks 0.50 0.50 0.50
-Ns 200.0
+Ns 100.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Nfc
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+map_Kd Nfc_Icon.png
+d 1.00
+illum 2
+
+newmtl Green
+Ka 0.20 0.20 0.20
+Kd 0.150 0.700 0.300
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Red
+Ka 0.20 0.20 0.20
+Kd 0.750 0.150 0.150
+Ks 0.50 0.50 0.50
+Ns 300.0
 Pm 0.00
 d 1.00
 illum 2

@@ -46,7 +46,11 @@ namespace FusionDarkRP.Integration
         Withdraw = 6,
         Query = 7,
         ForceStart = 8,
-        ForceCancel = 9
+        ForceCancel = 9,
+        // Coffre mural physique : code saisi au clavier, angle de porte, libération.
+        Code = 10,
+        DoorAngle = 11,
+        ResetCode = 12
     }
 
     public enum SecurityKind : byte
@@ -89,6 +93,10 @@ namespace FusionDarkRP.Integration
         public float Qz { get; set; }
         public float Qw { get; set; } = 1f;
         public bool HasBase { get; set; }
+        // Coffre mural physique.
+        public float Ang { get; set; }
+        public bool CodeSet { get; set; }
+        public float Lockout { get; set; }
     }
 
     public sealed class SecurityAlert
@@ -287,7 +295,7 @@ namespace FusionDarkRP.Integration
     /// client affiche des panneaux VR (curseur laser) sur les objets et
     /// anime la porte à partir de l'état diffusé.
     /// </summary>
-    public static class BankSecurity
+    public static partial class BankSecurity
     {
         private const string DoorModel = "BankSecurityDoor";
         private const string VaultModel = "BankVault";
@@ -452,7 +460,10 @@ namespace FusionDarkRP.Integration
             }
 
             if (IsHost())
+            {
                 TickForcing();
+                TickSafes();
+            }
         }
 
         // ------------------------------------------------------------
@@ -702,7 +713,7 @@ namespace FusionDarkRP.Integration
         // Hôte : état et droits
         // ------------------------------------------------------------
 
-        private sealed class HostState
+        private sealed partial class HostState
         {
             public SecurityKind Kind;
             public bool Open;
@@ -745,6 +756,9 @@ namespace FusionDarkRP.Integration
                     };
 
                     HostStates.Add(objectId, state);
+
+                    if (kind == SecurityKind.Safe)
+                        LoadSafeRecord(objectId, state);
                 }
 
                 return state;
@@ -856,20 +870,34 @@ namespace FusionDarkRP.Integration
             }
 
             float now = Time.realtimeSinceStartup;
+            bool angleRequest = request.A == (byte)SecurityAction.DoorAngle;
 
             lock (Sync)
             {
                 float last;
 
-                if (LastRequest.TryGetValue(sender.SmallID, out last) &&
-                    now - last < MinimumRequestInterval)
+                if (angleRequest)
                 {
-                    SendResponse(sender, request, false,
-                        "Trop de demandes, patientez.", -1);
-                    return;
-                }
+                    if (LastAngleRequest.TryGetValue(sender.SmallID, out last) &&
+                        now - last < 0.06f)
+                    {
+                        return;
+                    }
 
-                LastRequest[sender.SmallID] = now;
+                    LastAngleRequest[sender.SmallID] = now;
+                }
+                else
+                {
+                    if (LastRequest.TryGetValue(sender.SmallID, out last) &&
+                        now - last < MinimumRequestInterval)
+                    {
+                        SendResponse(sender, request, false,
+                            "Trop de demandes, patientez.", -1);
+                        return;
+                    }
+
+                    LastRequest[sender.SmallID] = now;
+                }
             }
 
             string modelId;
@@ -900,8 +928,34 @@ namespace FusionDarkRP.Integration
             long stock = -1;
             bool stateChanged = false;
 
+            // Le coffre mural ne se manipule qu'au clavier et à la poignée.
+            if (kind == SecurityKind.Safe &&
+                !IsSafeAction((SecurityAction)request.A))
+            {
+                SendResponse(sender, request, false,
+                    "Ce coffre se manipule physiquement (clavier et poignée).", -1);
+                return;
+            }
+
             switch ((SecurityAction)request.A)
             {
+                case SecurityAction.Code:
+                    ok = DoCode(
+                        sender, state, persistentId, request.M,
+                        out message, out stateChanged);
+                    break;
+
+                case SecurityAction.DoorAngle:
+                    DoDoorAngle(state, request.M, out stateChanged);
+                    ok = true;
+                    message = "";
+                    break;
+
+                case SecurityAction.ResetCode:
+                    ok = DoResetCode(
+                        state, manage, out message, out stateChanged);
+                    break;
+
                 case SecurityAction.Toggle:
                     ok = DoToggle(state, out message, out stateChanged);
                     break;
@@ -954,6 +1008,10 @@ namespace FusionDarkRP.Integration
 
             if (stateChanged)
                 BroadcastState(request.O, state);
+
+            // Les mises à jour d'angle n'attendent aucune réponse.
+            if (angleRequest)
+                return;
 
             SendResponse(sender, request, ok, message, stock);
         }
@@ -1393,6 +1451,9 @@ namespace FusionDarkRP.Integration
                 Forcing = state.Forcing
             };
 
+            if (state.Kind == SecurityKind.Safe)
+                FillSafeState(result, state);
+
             SecurityObject entry;
 
             lock (Sync)
@@ -1568,7 +1629,7 @@ namespace FusionDarkRP.Integration
         // Objet côté client (panneaux + animation)
         // ====================================================================
 
-        private sealed class SecurityObject
+        private sealed partial class SecurityObject
         {
             private const float ScreenWidth = 500f;
             private const float ScreenHeight = 750f;
@@ -1617,7 +1678,8 @@ namespace FusionDarkRP.Integration
                 BaseRotation = body.transform.rotation;
                 HasBase = true;
 
-                panels.Add(new Panel(this, false));
+                if (kind != SecurityKind.Safe)
+                    panels.Add(new Panel(this, false));
 
                 if (kind == SecurityKind.Door)
                     panels.Add(new Panel(this, true));
@@ -1690,6 +1752,12 @@ namespace FusionDarkRP.Integration
                     return;
 
                 CheckTimeout();
+
+                if (kind == SecurityKind.Safe)
+                {
+                    TickSafe(deltaTime);
+                    return;
+                }
 
                 if (kind != SecurityKind.Door)
                     return;
@@ -1775,6 +1843,9 @@ namespace FusionDarkRP.Integration
                 locked = state.Locked;
                 owner = state.Owner;
                 forcing = state.Forcing;
+
+                if (kind == SecurityKind.Safe)
+                    ApplySafeState(state);
 
                 if (!open)
                     stock = -1;
@@ -1896,6 +1967,8 @@ namespace FusionDarkRP.Integration
                     panel.Dispose();
 
                 panels.Clear();
+
+                DisposeSafe();
             }
 
             private string Title()

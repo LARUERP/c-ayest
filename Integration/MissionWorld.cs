@@ -195,14 +195,97 @@ namespace FusionDarkRP.Integration
             }
         }
 
+        private static bool wasHosting;
+        private static float nextExpireCheck;
+
+        /// <summary>
+        /// Fin de session : nettoie le monde ET abandonne toutes les missions
+        /// non terminées (elles ne sont jamais reprises).
+        /// </summary>
+        public static void ResetAndAbandon()
+        {
+            Reset();
+
+            try
+            {
+                EconomyRuntime runtime = EconomyRuntimeBootstrap.Runtime;
+
+                if (EconomyRuntimeBootstrap.IsInitialized &&
+                    runtime != null && runtime.Missions != null)
+                {
+                    int count = runtime.Missions.AbandonAll();
+
+                    if (count > 0)
+                        MelonLogger.Msg("[FusionDarkRP Missions] " + count
+                            + " mission(s) abandonnée(s) (fin de session).");
+                }
+            }
+            catch (Exception exception)
+            {
+                MelonLogger.Warning(
+                    "[FusionDarkRP Missions] Abandon fin de session : "
+                    + exception.Message);
+            }
+        }
+
+        /// <summary>Abandon volontaire d'une mission par le joueur.</summary>
+        public static bool Abandon(string playerKey, string missionId)
+        {
+            bool removed = false;
+
+            try
+            {
+                EconomyRuntime runtime = EconomyRuntimeBootstrap.Runtime;
+
+                if (EconomyRuntimeBootstrap.IsInitialized &&
+                    runtime != null && runtime.Missions != null)
+                {
+                    removed = runtime.Missions.Abandon(playerKey, missionId);
+                }
+            }
+            catch (Exception exception)
+            {
+                MelonLogger.Warning(
+                    "[FusionDarkRP Missions] Abandon : " + exception.Message);
+            }
+
+            lock (Sessions)
+            {
+                string key = playerKey + "|" + missionId;
+                Session session;
+
+                if (Sessions.TryGetValue(key, out session))
+                {
+                    Cleanup(session, true);
+                    Sessions.Remove(key);
+                }
+            }
+
+            return removed;
+        }
+
         // --------------------------------------------------------------
         // Boucle (appelée à chaque image par EconomyLifecycleMod)
         // --------------------------------------------------------------
 
         public static void Update()
         {
-            if (!NetworkInfo.HasServer || !NetworkInfo.IsHost)
+            bool hosting = NetworkInfo.HasServer && NetworkInfo.IsHost;
+
+            if (!hosting)
+            {
+                // On vient de quitter / fermer la session : plus aucune
+                // mission ne doit rester ouverte.
+                if (wasHosting)
+                {
+                    wasHosting = false;
+                    ResetAndAbandon();
+                }
+
                 return;
+            }
+
+            wasHosting = true;
 
             float now = Time.unscaledTime;
 
@@ -222,42 +305,80 @@ namespace FusionDarkRP.Integration
                 return;
             }
 
-            // 1) Crée les sessions des missions actives (reprise après relance).
+            // 1) Balayage : une mission n'est valable que pour un joueur
+            //    PRÉSENT, avec le BON métier, et pas trop ancienne. Sinon elle
+            //    est abandonnée (plus aucune mission fantôme).
+            if (now >= nextExpireCheck)
+            {
+                nextExpireCheck = now + 20f;
+
+                int expired = runtime.Missions.ExpireOld();
+
+                if (expired > 0)
+                    MelonLogger.Msg("[FusionDarkRP Missions] " + expired
+                        + " mission(s) expirée(s) (trop longues).");
+            }
+
+            Dictionary<string, PlayerID> present =
+                new Dictionary<string, PlayerID>(StringComparer.Ordinal);
+
             foreach (PlayerID player in PlayerIDManager.PlayerIDs)
             {
                 if (player == null || !player.IsValid)
                     continue;
 
-                string pid;
+                string playerPid;
 
-                if (!PlayerIdentityService.TryGetPersistentId(player, out pid))
+                if (PlayerIdentityService.TryGetPersistentId(player, out playerPid))
+                    present[playerPid] = player;
+            }
+
+            foreach (MissionRun run in runtime.Missions.GetAllActive())
+            {
+                if (run == null || run.Completed)
                     continue;
 
-                IReadOnlyList<MissionRun> runs =
-                    runtime.Missions.GetPlayerRuns(pid);
+                PlayerID owner;
+                JobMissionDefinition definition =
+                    JobMissionCatalog.Get(run.MissionId);
 
-                foreach (MissionRun run in runs)
+                bool drop = definition == null ||
+                    !present.TryGetValue(run.PlayerId, out owner);
+
+                if (!drop)
                 {
-                    if (run == null || run.Completed)
-                        continue;
+                    owner = present[run.PlayerId];
 
-                    string key = pid + "|" + run.MissionId;
+                    drop = !string.Equals(
+                        definition.JobId,
+                        EconomyJobResolver.GetJobIdFromPlayer(owner),
+                        StringComparison.OrdinalIgnoreCase);
+                }
 
-                    lock (Sessions)
+                if (drop)
+                {
+                    Abandon(run.PlayerId, run.MissionId);
+                    continue;
+                }
+
+                string key = run.PlayerId + "|" + run.MissionId;
+
+                lock (Sessions)
+                {
+                    Session existing;
+
+                    if (!Sessions.TryGetValue(key, out existing))
                     {
-                        if (!Sessions.ContainsKey(key))
+                        Sessions[key] = new Session
                         {
-                            Sessions[key] = new Session
-                            {
-                                PlayerKey = pid,
-                                MissionId = run.MissionId,
-                                SmallId = player.SmallID
-                            };
-                        }
-                        else
-                        {
-                            Sessions[key].SmallId = player.SmallID;
-                        }
+                            PlayerKey = run.PlayerId,
+                            MissionId = run.MissionId,
+                            SmallId = present[run.PlayerId].SmallID
+                        };
+                    }
+                    else
+                    {
+                        existing.SmallId = present[run.PlayerId].SmallID;
                     }
                 }
             }

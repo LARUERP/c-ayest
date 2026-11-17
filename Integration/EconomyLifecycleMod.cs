@@ -520,7 +520,7 @@ namespace FusionDarkRP.Integration
         {
             try
             {
-                MissionWorld.Reset();
+                MissionWorld.ResetAndAbandon();
                 MoneyPrinterService.Reset();
                 JobPerks.Reset();
                 DrugFarmService.Reset();

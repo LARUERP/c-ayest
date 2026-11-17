@@ -1,38 +1,65 @@
+newmtl Back
+Ka 0.20 0.20 0.20
+Kd 0.090 0.110 0.090
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+d 1.00
+illum 2
+
 newmtl Cover
 Ka 0.20 0.20 0.20
 Kd 1.000 1.000 1.000
 Ks 0.50 0.50 0.50
-Ns 420.0
+Ns 300.0
 Pm 0.00
-map_Kd Carbon.png
+map_Kd Catalog_Cover.png
 d 1.00
 illum 2
 
-newmtl Pages
+newmtl Paper
 Ka 0.20 0.20 0.20
-Kd 1.000 1.000 1.000
+Kd 0.960 0.950 0.900
 Ks 0.50 0.50 0.50
-Ns 120.0
+Ns 40.0
 Pm 0.00
 map_Kd Paper_Edge.png
 d 1.00
 illum 2
 
-newmtl Spine
+newmtl Ring
 Ka 0.20 0.20 0.20
-Kd 0.100 0.100 0.120
+Kd 0.780 0.800 0.840
 Ks 0.50 0.50 0.50
-Ns 400.0
+Ns 800.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl TabA
+Ka 0.20 0.20 0.20
+Kd 0.800 0.200 0.150
+Ks 0.50 0.50 0.50
+Ns 100.0
 Pm 0.00
 d 1.00
 illum 2
 
-newmtl Corner
+newmtl TabB
 Ka 0.20 0.20 0.20
-Kd 0.750 0.770 0.800
+Kd 0.850 0.700 0.150
 Ks 0.50 0.50 0.50
-Ns 650.0
-Pm 1.00
+Ns 100.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl TabC
+Ka 0.20 0.20 0.20
+Kd 0.150 0.450 0.800
+Ks 0.50 0.50 0.50
+Ns 100.0
+Pm 0.00
 d 1.00
 illum 2
 

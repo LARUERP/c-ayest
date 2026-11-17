@@ -179,6 +179,7 @@ namespace FusionDarkRP.Integration
                     cardId,
                     ownerPersistentId,
                     issuerPersistentId,
+                    DarkRPNetwork.GetPlayerName(targetPlayer.SmallID),
                     out registrationError);
 
                 if (!registered)

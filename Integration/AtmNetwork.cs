@@ -544,6 +544,29 @@ namespace FusionDarkRP.Integration
                         : runtime.BankCards.DescribeOwnership(
                             cardId, persistentId);
 
+                try
+                {
+                    string holder = cardId == null
+                        ? null
+                        : runtime.BankCards.GetHolderName(cardId);
+
+                    string notice = holder != null
+                        ? "Carte nominative : elle appartient à " + holder
+                            + ". Vous ne pouvez pas l'utiliser."
+                        : "Carte invalide ou remplacée par une nouvelle carte.";
+
+                    if (sender.IsMe)
+                        RpHub.Notify(notice, 2);
+                    else
+                        RpHub.PushNotice(sender, notice, 2);
+                }
+                catch (Exception noticeException)
+                {
+                    MelonLogger.Warning(
+                        "[FusionDarkRP ATM] Message de refus : "
+                        + noticeException.Message);
+                }
+
                 MelonLogger.Warning(
                     "[FusionDarkRP ATM] Carte refusée pour "
                     + persistentId + " : " + reason);

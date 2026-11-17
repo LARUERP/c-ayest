@@ -24,6 +24,15 @@ namespace FusionDarkRP.Integration
         public string Instruction { get; set; }
     }
 
+    public sealed class VehicleInfo
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public long Price { get; set; }
+        public int Access { get; set; }
+        public bool Installed { get; set; }
+    }
+
     public sealed class InvoiceInfo
     {
         public string Id { get; set; }
@@ -46,7 +55,7 @@ namespace FusionDarkRP.Integration
     /// </summary>
     public static class RpServices
     {
-        public const string TreasuryWallet = "system:treasury";
+        public const string TreasuryWallet = "system:town_treasury";
 
         private const float InvoiceLifetime = 180f;
         private const float MissionStepDelay = 20f;
@@ -73,6 +82,7 @@ namespace FusionDarkRP.Integration
             public long Amount;
             public string Label;
             public float Created;
+            public string VehicleId;     // vente de véhicule : livré au paiement
         }
 
         private sealed class Wanted
@@ -104,7 +114,9 @@ namespace FusionDarkRP.Integration
             RpHub.RegisterHost("mission.list", MissionList);
             RpHub.RegisterHost("mission.start", MissionStart);
             RpHub.RegisterHost("mission.advance", MissionAdvance);
+            RpHub.RegisterHost("mission.abandon", MissionAbandon);
 
+            RpHub.RegisterHost("veh.sell", VehicleSell);
             RpHub.RegisterHost("invoice.create", InvoiceCreate);
             RpHub.RegisterHost("invoice.list", InvoiceList);
             RpHub.RegisterHost("invoice.pay", InvoicePay);
@@ -532,6 +544,29 @@ namespace FusionDarkRP.Integration
             }
         }
 
+        private static RpResponse MissionAbandon(
+            PlayerID sender, RpRequest request)
+        {
+            EconomyRuntime runtime;
+            string pid;
+
+            if (!Runtime(out runtime) || runtime.Missions == null ||
+                !Pid(sender, out pid) ||
+                string.IsNullOrWhiteSpace(request.A))
+            {
+                return Fail("Service de missions indisponible.");
+            }
+
+            MissionRun run = runtime.Missions.GetActive(pid, request.A);
+
+            if (run == null || run.Completed)
+                return Fail("Aucune mission en cours à abandonner.");
+
+            MissionWorld.Abandon(pid, request.A);
+
+            return Ok("Mission abandonnée. Vous pourrez la relancer.");
+        }
+
         private static RpResponse MissionAdvance(
             PlayerID sender, RpRequest request)
         {
@@ -620,6 +655,83 @@ namespace FusionDarkRP.Integration
 
                 foreach (string key in remove)
                     Invoices.Remove(key);
+            }
+        }
+
+        /// <summary>
+        /// Vente de véhicule : réservée au concessionnaire, à un client proche. Une facture est
+        /// envoyée ; le véhicule est livré devant le client quand il la paie.
+        /// </summary>
+        private static RpResponse VehicleSell(PlayerID sender, RpRequest request)
+        {
+            string pid;
+            PlayerID target = Target(request);
+
+            if (!string.Equals(Job(sender), "concessionnaire", StringComparison.OrdinalIgnoreCase))
+                return Fail("Seul un concessionnaire peut vendre des véhicules.");
+
+            if (target == null || target.SmallID == sender.SmallID)
+                return Fail("Client invalide.");
+
+            if (!Pid(sender, out pid))
+                return Fail("Identité introuvable.");
+
+            if (!Near(sender, target, NearInvoice))
+                return Fail("Le client est trop loin (8 m maximum).");
+
+            VehicleDefinition definition = JobVehicleCatalog.Find(
+                "concessionnaire", EconomyJobResolver.GetGradeIndexFromPlayer(sender), request.A);
+
+            if (definition == null)
+                return Fail("Véhicule inconnu du catalogue.");
+
+            if (!GameItemService.IsAvailable(definition.Keywords, true))
+            {
+                return Fail("« " + definition.Name + " » n'est pas installé dans BONELAB "
+                    + "(vehicles.json / spawnable-titles.txt). Aucune facture créée.");
+            }
+
+            PurgeInvoices();
+
+            lock (Sync)
+            {
+                int pending = 0;
+
+                foreach (Invoice item in Invoices.Values)
+                {
+                    if (item.FromId == sender.SmallID)
+                        pending++;
+                }
+
+                if (pending >= MaxInvoicesPerIssuer)
+                    return Fail("Trop de factures en attente.");
+
+                Invoice invoice = new Invoice
+                {
+                    Id = Guid.NewGuid().ToString("N").Substring(0, 8),
+                    FromId = sender.SmallID,
+                    FromPid = pid,
+                    FromName = Name(sender),
+                    ToId = target.SmallID,
+                    Amount = JobVehicleCatalog.EffectivePrice(definition),
+                    Label = CleanText(definition.Name, 40),
+                    Created = Time.realtimeSinceStartup,
+                    VehicleId = definition.Id
+                };
+
+                Invoices[invoice.Id] = invoice;
+
+                RpHub.Push(target, new RpResponse
+                {
+                    K = "invoice.new",
+                    T = 0,
+                    Ok = true,
+                    Msg = Name(sender) + " vous propose : " + invoice.Label + " pour "
+                        + Money(invoice.Amount) + ". Menu Factures pour accepter."
+                });
+
+                return Ok("Offre envoyée à " + Name(target) + " : " + invoice.Label
+                    + " (" + Money(invoice.Amount) + ").");
             }
         }
 
@@ -764,6 +876,31 @@ namespace FusionDarkRP.Integration
 
             if (!TakeInvoice(sender, request.A, out invoice))
                 return Fail("Facture introuvable ou expirée.");
+
+            if (!string.IsNullOrEmpty(invoice.VehicleId))
+            {
+                string saleMessage;
+                PlayerID dealer = PlatformIds.GetPlayerID(invoice.FromId);
+
+                if (!JobPerks.CompleteVehicleSale(
+                        sender, payerPid, invoice.VehicleId, dealer, invoice.FromPid,
+                        out saleMessage))
+                {
+                    // Remet l'offre pour un nouvel essai (fonds, cadence...).
+                    lock (Sync)
+                        Invoices[invoice.Id] = invoice;
+
+                    return Fail(saleMessage);
+                }
+
+                if (dealer != null)
+                {
+                    RpHub.PushNotice(dealer,
+                        Name(sender) + " a acheté : " + invoice.Label + ".", 1);
+                }
+
+                return Ok(saleMessage);
+            }
 
             WalletData wallet = runtime.Wallets.GetWallet(payerPid);
 

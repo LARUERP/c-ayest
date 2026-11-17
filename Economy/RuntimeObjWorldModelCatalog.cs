@@ -14,7 +14,9 @@ namespace FusionDarkRP.Economy
         CashNote,
         CashCoin,
         CashBundle,
-        RpEquipment
+        RpEquipment,
+        /// <summary>Modèles auxiliaires (non listés dans les menus d'administration).</summary>
+        Hidden
     }
 
     public sealed class WorldModelDefinition
@@ -259,6 +261,12 @@ namespace FusionDarkRP.Economy
                     new WorldModelDefinition(
                         "WallSafe", "Coffre mural",
                         WorldModelCategory.BankStorage, false, true)
+                },
+                {
+                    "WallSafeDoor",
+                    new WorldModelDefinition(
+                        "WallSafeDoor", "Porte du coffre mural",
+                        WorldModelCategory.Hidden, false, false)
                 },
 
                 {

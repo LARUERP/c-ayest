@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using FusionDarkRP.Economy;
+using FusionDarkRP.RP;
 using LabFusion.Network;
 using LabFusion.Player;
 using MelonLoader;
@@ -14,18 +16,16 @@ namespace FusionDarkRP.Integration
     ///    comme armes de service) qui apparaît devant le joueur ;
     ///  - à la débauche / changement de métier : tout ce qui avait été donné
     ///    est retiré ;
-    ///  - véhicules : service (police), gang (patron/associés) ou achat chez
-    ///    un concessionnaire (commission versée au vendeur en ligne).
+    ///  - véhicules : vendus UNIQUEMENT par un concessionnaire à un client proche
+    ///    (facture, puis livraison au paiement ; commission au concessionnaire).
     /// </summary>
     public static class JobPerks
     {
         private const float TickInterval = 1.5f;
         private const float KitCooldown = 120f;
         private const float VehicleCooldown = 90f;
-        private const long GangVehicleCents = 25000L;
-        private const long PurchaseVehicleCents = 40000L;
         private const double DealerCommission = 0.15;
-        private const string TreasuryWallet = "system:town_treasury";
+        private const string TreasuryWallet = "system:town_treasury";   // même portefeuille que RpServices, DrugFarmService et BankSecurity
 
         private static readonly string[] VehicleWords =
             { "jalopy", "buggy", "truck", "van", "car", "cart", "scooter", "bike", "vehicle" };
@@ -119,7 +119,6 @@ namespace FusionDarkRP.Integration
         public static void RegisterHandlers()
         {
             RpHub.RegisterHost("perk.kit", HandleKit);
-            RpHub.RegisterHost("veh.spawn", HandleVehicle);
         }
 
         // --------------------------------------------------------------
@@ -382,92 +381,106 @@ namespace FusionDarkRP.Integration
         // Véhicules
         // --------------------------------------------------------------
 
-        private static RpResponse HandleVehicle(PlayerID sender, RpRequest request)
+        /// <summary>
+        /// Finalise une vente de véhicule au paiement de la facture : contrôles, paiement
+        /// (commission au concessionnaire, reste au trésor), puis apparition du véhicule
+        /// devant l'acheteur. Retourne faux sans rien débiter si un contrôle échoue.
+        /// </summary>
+        public static bool CompleteVehicleSale(
+            PlayerID buyer, string buyerPid, string vehicleId,
+            PlayerID dealer, string dealerPid, out string message)
         {
-            string pid;
-
-            if (!PlayerIdentityService.TryGetPersistentId(sender, out pid))
-                return Fail("Identité introuvable.");
+            message = null;
 
             if (!EconomyRuntimeBootstrap.IsInitialized ||
                 EconomyRuntimeBootstrap.Runtime == null)
             {
-                return Fail("Économie indisponible.");
+                message = "Économie indisponible.";
+                return false;
             }
 
             EconomyRuntime runtime = EconomyRuntimeBootstrap.Runtime;
 
-            string job = EconomyJobResolver.GetJobIdFromPlayer(sender);
-            int grade = EconomyJobResolver.GetGradeIndexFromPlayer(sender);
-
-            if (!Cooldown("veh|" + pid, VehicleCooldown))
-                return Fail("Un véhicule a déjà été sorti il y a peu, patientez.");
-
-            long price = 0;
-            string dealerPid = null;
-            string how;
-
-            if (job == "police")
+            if (dealer == null || !dealer.IsValid ||
+                EconomyJobResolver.GetJobIdFromPlayer(dealer) != "concessionnaire")
             {
-                how = "Véhicule de service";
-            }
-            else if (job == "concessionnaire")
-            {
-                how = "Véhicule de démonstration";
-            }
-            else if (job == "marseillais" || job == "parisiens" || job == "gens_du_voyage")
-            {
-                if (grade < 1)
-                    return Fail("Réservé aux associés et au-dessus.");
-
-                price = GangVehicleCents;
-                how = "Véhicule du gang";
-            }
-            else
-            {
-                dealerPid = FindDealer();
-
-                if (dealerPid == null)
-                    return Fail("Aucun concessionnaire en service : impossible d'acheter.");
-
-                price = PurchaseVehicleCents;
-                how = "Véhicule acheté";
+                message = "Le concessionnaire n'est plus en service : vente annulée.";
+                return false;
             }
 
-            if (price > 0)
+            VehicleDefinition definition = JobVehicleCatalog.Find(
+                "concessionnaire",
+                EconomyJobResolver.GetGradeIndexFromPlayer(dealer), vehicleId);
+
+            if (definition == null)
             {
-                WalletData wallet = runtime.Wallets.GetWallet(pid);
-
-                if (wallet == null || wallet.CashCents < price)
-                    return Fail("Il faut " + BankService.FormatAmount(price)
-                        + " en liquide.");
-
-                string error;
-                long commission = dealerPid != null
-                    ? (long)(price * DealerCommission) : 0L;
-
-                if (commission > 0 &&
-                    !runtime.Wallets.TryMoveCashToWalletBank(
-                        true, "veh:c:" + Guid.NewGuid().ToString("N"),
-                        pid, dealerPid, commission, out error))
-                {
-                    return Fail("Paiement refusé : " + error);
-                }
-
-                if (!runtime.Wallets.TryMoveCashToWalletBank(
-                        true, "veh:t:" + Guid.NewGuid().ToString("N"),
-                        pid, TreasuryWallet, price - commission, out error))
-                {
-                    return Fail("Paiement refusé : " + error);
-                }
+                message = "Ce véhicule n'est plus au catalogue.";
+                return false;
             }
 
-            Transform body = PhysicalCashRigAnchorResolver.ResolveBody(sender);
+            // Le véhicule doit exister dans le jeu AVANT tout paiement.
+            if (!GameItemService.IsAvailable(definition.Keywords, true))
+            {
+                message = "« " + definition.Name + " » n'est pas installé dans BONELAB "
+                    + "(voir vehicles.json et spawnable-titles.txt). Aucun paiement effectué.";
+                return false;
+            }
+
+            Transform body = PhysicalCashRigAnchorResolver.ResolveBody(buyer);
 
             if (body == null)
-                return Fail("Position introuvable.");
+            {
+                message = "Position de l'acheteur introuvable. Aucun paiement effectué.";
+                return false;
+            }
 
-            GameItemService.Release(pid + "|veh");
+            long price = JobVehicleCatalog.EffectivePrice(definition);
+            WalletData wallet = runtime.Wallets.GetWallet(buyerPid);
+
+            if (wallet == null ||
+                (wallet.BankCents < price && wallet.CashCents < price))
+            {
+                message = "Il faut " + BankService.FormatAmount(price)
+                    + " (en banque ou en liquide). Aucun paiement effectué.";
+                return false;
+            }
+
+            if (!Cooldown("veh|" + buyerPid, VehicleCooldown))
+            {
+                message = "Un véhicule vient d'être livré, patientez avant le suivant.";
+                return false;
+            }
+
+            bool fromBank = wallet.BankCents >= price;
+            long commission = (long)(price * DealerCommission);
+            string error;
+
+            // Le plus gros montant d'abord : en cas d'échec, rien n'est débité.
+            bool paid = fromBank
+                ? runtime.Wallets.TryTransfer(true, PhysicalCashRequestId.Create(),
+                    buyerPid, TreasuryWallet, price - commission, out error)
+                : runtime.Wallets.TryMoveCashToWalletBank(true, PhysicalCashRequestId.Create(),
+                    buyerPid, TreasuryWallet, price - commission, out error);
+
+            if (!paid)
+            {
+                message = "Paiement refusé : " + error;
+                return false;
+            }
+
+            if (commission > 0)
+            {
+                bool paidDealer = fromBank
+                    ? runtime.Wallets.TryTransfer(true, PhysicalCashRequestId.Create(),
+                        buyerPid, dealerPid, commission, out error)
+                    : runtime.Wallets.TryMoveCashToWalletBank(true, PhysicalCashRequestId.Create(),
+                        buyerPid, dealerPid, commission, out error);
+
+                if (!paidDealer)
+                    MelonLogger.Warning("[FusionDarkRP Véhicules] Commission non versée : " + error);
+            }
+
+            GameItemService.Release(buyerPid + "|veh");
 
             Vector3 forward = body.forward;
             forward.y = 0f;
@@ -480,38 +493,22 @@ namespace FusionDarkRP.Integration
             string title;
 
             bool ok = GameItemService.TryGive(
-                pid + "|veh", VehicleWords, true,
+                buyerPid + "|veh", definition.Keywords, true,
                 body.position + forward * 3.5f - Vector3.up * 0.8f,
                 Quaternion.LookRotation(forward, Vector3.up), out title);
 
             if (!ok)
             {
-                return Fail("Aucun véhicule n'est chargé dans BONELAB "
-                    + "(voir UserData/FusionDarkRP/spawnable-titles.txt). "
-                    + (price > 0 ? "Paiement conservé : redemandez plus tard." : ""));
+                MelonLogger.Warning("[FusionDarkRP Véhicules] Apparition échouée après paiement : "
+                    + buyerPid + " / " + definition.Id);
+
+                message = "Paiement effectué mais le véhicule n'a pas pu apparaître : "
+                    + "demandez au concessionnaire de vous rembourser.";
+                return true;
             }
 
-            return Ok(how + " : " + title
-                + (price > 0 ? " (" + BankService.FormatAmount(price) + ")." : "."));
-        }
-
-        private static string FindDealer()
-        {
-            foreach (PlayerID player in PlayerIDManager.PlayerIDs)
-            {
-                if (player == null || !player.IsValid)
-                    continue;
-
-                if (EconomyJobResolver.GetJobIdFromPlayer(player) != "concessionnaire")
-                    continue;
-
-                string pid;
-
-                if (PlayerIdentityService.TryGetPersistentId(player, out pid))
-                    return pid;
-            }
-
-            return null;
+            message = definition.Name + " livré (" + BankService.FormatAmount(price) + ").";
+            return true;
         }
 
         // --------------------------------------------------------------

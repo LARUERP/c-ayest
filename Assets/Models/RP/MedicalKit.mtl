@@ -1,8 +1,26 @@
 newmtl Body
 Ka 0.20 0.20 0.20
-Kd 0.950 0.950 0.950
+Kd 0.760 0.080 0.100
 Ks 0.50 0.50 0.50
-Ns 520.0
+Ns 700.0
+Pm 0.20
+d 1.00
+illum 2
+
+newmtl Seam
+Ka 0.20 0.20 0.20
+Kd 0.040 0.040 0.045
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Plate
+Ka 0.20 0.20 0.20
+Kd 0.950 0.950 0.960
+Ks 0.50 0.50 0.50
+Ns 500.0
 Pm 0.00
 d 1.00
 illum 2
@@ -11,27 +29,55 @@ newmtl Cross
 Ka 0.20 0.20 0.20
 Kd 1.000 1.000 1.000
 Ks 0.50 0.50 0.50
-Ns 520.0
+Ns 500.0
 Pm 0.00
 map_Kd Medical_Cross.png
 d 1.00
 illum 2
 
-newmtl Handle
+newmtl Metal
 Ka 0.20 0.20 0.20
-Kd 0.150 0.150 0.170
+Kd 0.800 0.820 0.860
 Ks 0.50 0.50 0.50
-Ns 500.0
+Ns 850.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl Dark
+Ka 0.20 0.20 0.20
+Kd 0.050 0.050 0.060
+Ks 0.50 0.50 0.50
+Ns 300.0
 Pm 0.00
 d 1.00
 illum 2
 
-newmtl Latch
+newmtl Grip
 Ka 0.20 0.20 0.20
-Kd 0.700 0.720 0.760
+Kd 0.040 0.040 0.050
 Ks 0.50 0.50 0.50
-Ns 650.0
-Pm 1.00
+Ns 80.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Corner
+Ka 0.20 0.20 0.20
+Kd 0.090 0.090 0.100
+Ks 0.50 0.50 0.50
+Ns 120.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Reflect
+Ka 0.20 0.20 0.20
+Kd 0.900 0.920 0.700
+Ks 0.50 0.50 0.50
+Ns 900.0
+Pm 0.00
+Ke 0.150 0.160 0.100
 d 1.00
 illum 2
 

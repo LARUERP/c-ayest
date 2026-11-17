@@ -1,28 +1,74 @@
-newmtl Cover
+newmtl Leather
 Ka 0.20 0.20 0.20
-Kd 0.080 0.100 0.200
+Kd 1.000 1.000 1.000
 Ks 0.50 0.50 0.50
-Ns 300.0
+Ns 180.0
 Pm 0.00
 map_Kd Leather.png
 d 1.00
 illum 2
 
-newmtl Pages
+newmtl Paper
 Ka 0.20 0.20 0.20
-Kd 1.000 1.000 1.000
+Kd 0.960 0.950 0.900
 Ks 0.50 0.50 0.50
-Ns 120.0
+Ns 40.0
 Pm 0.00
 map_Kd Paper_Edge.png
 d 1.00
 illum 2
 
-newmtl Spiral
+newmtl Star
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 600.0
+Pm 0.40
+map_Kd Police_Star.png
+d 1.00
+illum 2
+
+newmtl Ring
 Ka 0.20 0.20 0.20
 Kd 0.750 0.770 0.800
 Ks 0.50 0.50 0.50
-Ns 650.0
+Ns 800.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl Strap
+Ka 0.20 0.20 0.20
+Kd 0.040 0.040 0.050
+Ks 0.50 0.50 0.50
+Ns 60.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Pen
+Ka 0.20 0.20 0.20
+Kd 0.060 0.120 0.450
+Ks 0.50 0.50 0.50
+Ns 700.0
+Pm 0.30
+d 1.00
+illum 2
+
+newmtl PenTip
+Ka 0.20 0.20 0.20
+Kd 0.800 0.820 0.850
+Ks 0.50 0.50 0.50
+Ns 800.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl Clip
+Ka 0.20 0.20 0.20
+Kd 0.800 0.820 0.850
+Ks 0.50 0.50 0.50
+Ns 800.0
 Pm 1.00
 d 1.00
 illum 2

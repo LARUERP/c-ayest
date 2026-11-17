@@ -11,6 +11,8 @@ namespace FusionDarkRP.Economy
         public string CardId { get; set; }
         public string OwnerPlayerId { get; set; }
         public string IssuedByPlayerId { get; set; }
+        /// <summary>Nom du personnage titulaire (carte nominative).</summary>
+        public string OwnerName { get; set; }
         public long CreatedAtUtcTicks { get; set; }
         public bool Revoked { get; set; }
     }
@@ -100,6 +102,24 @@ namespace FusionDarkRP.Economy
             string issuedByPlayerId,
             out string error)
         {
+            return IssueCard(
+                isAuthority, cardId, ownerPlayerId, issuedByPlayerId,
+                null, out error);
+        }
+
+        /// <summary>
+        /// Carte NOMINATIVE : elle est dédiée à un personnage (titulaire) et un
+        /// seul exemplaire reste actif par titulaire. Délivrer une nouvelle carte
+        /// invalide l'ancienne (perte, vol, remplacement).
+        /// </summary>
+        public bool IssueCard(
+            bool isAuthority,
+            string cardId,
+            string ownerPlayerId,
+            string issuedByPlayerId,
+            string ownerName,
+            out string error)
+        {
             error = null;
 
             if (!isAuthority)
@@ -140,15 +160,36 @@ namespace FusionDarkRP.Economy
                     CardId = cardId,
                     OwnerPlayerId = ownerPlayerId,
                     IssuedByPlayerId = issuedByPlayerId,
+                    OwnerName = string.IsNullOrWhiteSpace(ownerName)
+                        ? null
+                        : (ownerName.Length > 40 ? ownerName.Substring(0, 40) : ownerName),
                     CreatedAtUtcTicks = DateTime.UtcNow.Ticks,
                     Revoked = false
                 };
+
+                // Une seule carte active par personnage : les anciennes sont invalidées.
+                List<BankCardData> replaced = new List<BankCardData>();
+
+                foreach (BankCardData existing in cards.Values)
+                {
+                    if (existing != null && !existing.Revoked &&
+                        string.Equals(
+                            existing.OwnerPlayerId, ownerPlayerId,
+                            StringComparison.Ordinal))
+                    {
+                        existing.Revoked = true;
+                        replaced.Add(existing);
+                    }
+                }
 
                 cards.Add(cardId, card);
 
                 if (!SaveInternal())
                 {
                     cards.Remove(cardId);
+
+                    foreach (BankCardData restored in replaced)
+                        restored.Revoked = false;
 
                     error =
                         "Impossible de sauvegarder la nouvelle carte.";
@@ -199,6 +240,28 @@ namespace FusionDarkRP.Economy
                 }
 
                 return "valide";
+            }
+        }
+
+        /// <summary>Nom du personnage titulaire d'une carte active, sinon null.</summary>
+        public string GetHolderName(string cardId)
+        {
+            if (!IsValidCardId(cardId))
+                return null;
+
+            lock (sync)
+            {
+                BankCardData card;
+
+                if (!cards.TryGetValue(cardId, out card) || card == null ||
+                    card.Revoked)
+                {
+                    return null;
+                }
+
+                return string.IsNullOrWhiteSpace(card.OwnerName)
+                    ? "un autre joueur"
+                    : card.OwnerName;
             }
         }
 
@@ -566,6 +629,7 @@ namespace FusionDarkRP.Economy
                 CardId = source.CardId,
                 OwnerPlayerId = source.OwnerPlayerId,
                 IssuedByPlayerId = source.IssuedByPlayerId,
+                OwnerName = source.OwnerName,
                 CreatedAtUtcTicks = source.CreatedAtUtcTicks,
                 Revoked = source.Revoked
             };

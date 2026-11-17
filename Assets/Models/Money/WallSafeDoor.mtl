@@ -1,0 +1,57 @@
+newmtl Door
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.85
+map_Kd Steel_Mid.png
+d 1.00
+illum 2
+
+newmtl Raised
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 520.0
+Pm 0.85
+map_Kd Steel_Dark.png
+d 1.00
+illum 2
+
+newmtl Knurl
+Ka 0.20 0.20 0.20
+Kd 0.160 0.160 0.180
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.80
+d 1.00
+illum 2
+
+newmtl DialFace
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 600.0
+Pm 0.00
+map_Kd Safe_Dial.png
+d 1.00
+illum 2
+
+newmtl Chrome
+Ka 0.20 0.20 0.20
+Kd 0.880 0.890 0.920
+Ks 0.50 0.50 0.50
+Ns 820.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl Bolt
+Ka 0.20 0.20 0.20
+Kd 0.700 0.720 0.760
+Ks 0.50 0.50 0.50
+Ns 700.0
+Pm 1.00
+d 1.00
+illum 2
+

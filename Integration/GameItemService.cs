@@ -142,6 +142,15 @@ namespace FusionDarkRP.Integration
             return false;
         }
 
+        /// <summary>Vrai si au moins un objet du jeu correspond aux mots-clés (sans rien créer).</summary>
+        public static bool IsAvailable(string[] keywords, bool wholeWord)
+        {
+            Spawnable spawnable;
+            string title;
+
+            return TryFind(keywords, wholeWord, out spawnable, out title);
+        }
+
         /// <summary>
         /// Écrit la liste des objets chargés dans
         /// UserData/FusionDarkRP/spawnable-titles.txt (aide au réglage des

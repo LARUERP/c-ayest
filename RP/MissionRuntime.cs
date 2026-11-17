@@ -114,6 +114,73 @@ namespace FusionDarkRP.RP
             }
         }
 
+        /// <summary>Durée maximale d'une mission active avant abandon automatique.</summary>
+        public const int MaxActiveMinutes = 40;
+
+        /// <summary>Toutes les missions en cours (non terminées), toutes personnes confondues.</summary>
+        public IReadOnlyList<MissionRun> GetAllActive()
+        {
+            lock (sync)
+            {
+                return active.Values.Where(x => !x.Completed).Select(Clone).ToArray();
+            }
+        }
+
+        /// <summary>Abandonne une mission : l'entrée disparaît, la mission peut être relancée.</summary>
+        public bool Abandon(string playerId, string missionId)
+        {
+            lock (sync)
+            {
+                string key = Key(playerId, missionId);
+                MissionRun run;
+                if (!active.TryGetValue(key, out run) || run.Completed) return false;
+                active.Remove(key);
+                Save();
+                return true;
+            }
+        }
+
+        /// <summary>Abandonne toutes les missions non terminées d'un joueur.</summary>
+        public int AbandonPlayer(string playerId)
+        {
+            lock (sync)
+            {
+                string[] keys = active
+                    .Where(x => !x.Value.Completed && x.Value.PlayerId == playerId)
+                    .Select(x => x.Key).ToArray();
+                foreach (string key in keys) active.Remove(key);
+                if (keys.Length > 0) Save();
+                return keys.Length;
+            }
+        }
+
+        /// <summary>Abandonne toutes les missions non terminées (fin de session).</summary>
+        public int AbandonAll()
+        {
+            lock (sync)
+            {
+                string[] keys = active.Where(x => !x.Value.Completed).Select(x => x.Key).ToArray();
+                foreach (string key in keys) active.Remove(key);
+                if (keys.Length > 0) Save();
+                return keys.Length;
+            }
+        }
+
+        /// <summary>Abandonne les missions commencées il y a plus de MaxActiveMinutes.</summary>
+        public int ExpireOld()
+        {
+            lock (sync)
+            {
+                DateTime limit = DateTime.UtcNow.AddMinutes(-MaxActiveMinutes);
+                string[] keys = active
+                    .Where(x => !x.Value.Completed && x.Value.StartedUtc < limit)
+                    .Select(x => x.Key).ToArray();
+                foreach (string key in keys) active.Remove(key);
+                if (keys.Length > 0) Save();
+                return keys.Length;
+            }
+        }
+
         public MissionRun GetActive(string playerId, string missionId)
         {
             lock (sync)
@@ -149,6 +216,7 @@ namespace FusionDarkRP.RP
             {
                 SaveData data = JsonSerializer.Deserialize<SaveData>(File.ReadAllText(savePath), options);
                 if (data == null) return;
+                int dropped = 0;
                 lock (sync)
                 {
                     foreach (MissionRun run in data.Runs ?? new List<MissionRun>())
@@ -157,12 +225,27 @@ namespace FusionDarkRP.RP
                             string.IsNullOrWhiteSpace(run.MissionId) || string.IsNullOrWhiteSpace(run.RunId)) continue;
                         JobMissionDefinition mission = JobMissionCatalog.Get(run.MissionId);
                         if (mission == null) continue;
+
+                        // Une mission non terminée n'est JAMAIS reprise après un
+                        // redémarrage : la session (joueurs, balises, objets) n'existe plus.
+                        if (!run.Completed)
+                        {
+                            dropped++;
+                            continue;
+                        }
+
                         run.CurrentStep = Math.Max(0, Math.Min(run.CurrentStep, mission.Steps.Length));
                         active[Key(run.PlayerId, run.MissionId)] = run;
                     }
                     if (data.Cooldowns != null)
                         foreach (KeyValuePair<string, DateTime> item in data.Cooldowns)
                             if (!string.IsNullOrWhiteSpace(item.Key)) cooldowns[item.Key] = item.Value;
+                }
+                if (dropped > 0)
+                {
+                    MelonLoader.MelonLogger.Msg("[FusionDarkRP Missions] " + dropped
+                        + " mission(s) interrompue(s) abandonnée(s) au démarrage.");
+                    lock (sync) { Save(); }
                 }
             }
             catch (Exception ex)

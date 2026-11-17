@@ -41,3 +41,22 @@ Nouveautés : missions réelles, imprimante à billets, liasses de 50 billets, r
 ## 3.1.0-EOS
 Version dédiée LabFusion EOS (Libs/LabFusion.dll = build EOS). Voir CHANGELOG_EOS.md.
 Placement : regarder où poser, A = poser, B = annuler, clic stick gauche = tourner.
+
+---
+
+## Nouveautés 5.1.0 — mode d'emploi rapide
+
+**Coffre mural physique** : approchez-vous, visez une touche du clavier (à droite de la porte) et appuyez sur la gâchette.
+Coffre libre : tapez un code de 4 à 6 chiffres puis `#` pour le réserver. Coffre réservé : code + `#` pour déverrouiller,
+puis saisissez la poignée (gâchette maintenue) et tirez. Fermez la porte : elle se reverrouille seule. Déverrouillé et
+propriétaire : un nouveau code + `#` remplace l'ancien ; `*` maintenu 2,5 s libère le coffre (videz-le avant).
+
+**Missions** : bouton « Abandonner la mission » dans le menu ; plus aucune reprise après relance, départ du joueur ou
+changement de métier ; expiration après 40 minutes.
+
+**Véhicules** : seul le concessionnaire en vend, directement à un client (plus aucun menu d'achat ni véhicule de métier). Le concessionnaire ouvre Joueurs connectés > le client > Actions RP > Vendre un véhicule ; le client (à moins de 8 m) reçoit une offre à accepter dans le menu Factures, et le véhicule apparaît devant lui au paiement (15 % de commission au concessionnaire, le reste au trésor municipal). Les modèles (Clio, TMAX…) viennent de VOS mods
+de véhicules : adaptez `UserData/FusionDarkRP/vehicles.json` aux titres listés dans `spawnable-titles.txt`.
+
+**Téléphone** : si la photo ou la visio est noire, regardez le journal MelonLoader : « Caméra téléphone : stratégie N ».
+
+**Cartes bancaires** : nominatives, une seule carte active par personnage ; une nouvelle carte invalide l'ancienne.

@@ -7,6 +7,15 @@ Pm 0.80
 d 1.00
 illum 2
 
+newmtl Bezel
+Ka 0.20 0.20 0.20
+Kd 0.020 0.020 0.025
+Ks 0.50 0.50 0.50
+Ns 800.0
+Pm 0.00
+d 1.00
+illum 2
+
 newmtl Screen
 Ka 0.20 0.20 0.20
 Kd 1.000 1.000 1.000
@@ -15,6 +24,33 @@ Ns 900.0
 Pm 0.00
 Ke 0.350 0.450 0.600
 map_Kd Tablet_UI.png
+d 1.00
+illum 2
+
+newmtl Case
+Ka 0.20 0.20 0.20
+Kd 0.050 0.060 0.070
+Ks 0.50 0.50 0.50
+Ns 100.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Cam
+Ka 0.20 0.20 0.20
+Kd 0.010 0.010 0.020
+Ks 0.50 0.50 0.50
+Ns 900.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Btn
+Ka 0.20 0.20 0.20
+Kd 0.550 0.570 0.600
+Ks 0.50 0.50 0.50
+Ns 700.0
+Pm 1.00
 d 1.00
 illum 2
 
