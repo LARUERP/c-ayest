@@ -1,3 +1,36 @@
+# 5.6.0 — équilibrage et cohérence (non compilé ici ; à valider par GitHub Actions puis en jeu)
+
+## Véhicules chers mais accessibles
+- Prix : vélo 150 EUR, scooter 700, Twingo 1 500, Clio 2 000, 208 2 200, TMAX 2 600, Golf 3 000 ; véhicule générique BONELAB 1 500 (avant : 50 à 600 EUR). Repères : salaire 35 à 55 EUR
+  par palier de 15 min, missions 40 à 475 EUR : un véhicule demande quelques missions, le vélo et le scooter permettent de démarrer.
+- vehicles.json est versionné (Version 3) : l'ancien fichier est sauvegardé en `vehicles.json.v1.bak` (ou `.vN.bak`) puis remplacé, sinon les anciens prix auraient été conservés.
+
+## Incohérences corrigées
+- Cannabis beaucoup trop rentable par rapport aux métiers (≈ 7 500 EUR/h) : maturité 15 min (stade 2 à 5 min), flétrissement 15 min après maturité, graines 60 EUR,
+  prix de rue 25 à 50 EUR par sachet (x1,2 pour les gangs) soit ≈ 2 000 EUR/h pour 4 plants, comparable aux missions ; saisie par la police revalorisée (80 EUR par plant, 40 EUR par sachet, plafond 500 EUR).
+- Équipement : les kits donnés à l'embauche respectent maintenant les grades minimum du catalogue d'équipement (mallette d'armes à partir du grade 2, défibrillateur grade 3 ; menottes et terminal bancaire
+  disponibles dès le premier grade, comme un vrai policier ou guichetier). Le concessionnaire figure enfin dans le catalogue d'équipement (tablette de vente, clés de voiture).
+- (rappel 5.4.0/5.5.0) trésor municipal unifié (`system:town_treasury`), équipe 11 dans les menus et annonces.
+
+# 5.5.0 — build finale (non compilée ici : aucun SDK .NET dans le bac à sable ; à valider par GitHub Actions puis en jeu)
+
+## Métier de concessionnaire enfin accessible
+- Cause : l'équipe 11 (Concession automobile) existait mais manquait dans le menu de recrutement de l'hôte (Class1.cs : équipes 1 à 10 seulement), dans
+  « Factions » et « Hiérarchies », et dans les annonces de faction (DarkRPNetwork : bornes 1 à 10). Corrigé : l'hôte peut maintenant nommer un concessionnaire
+  (Joueurs connectés > joueur > Recrutement / gestion > Concession automobile) ; le patron de concession recrute ensuite son équipe.
+- Rappel : seul un concessionnaire vend des véhicules (Joueurs connectés > client > Actions RP > Vendre un véhicule). Équipement : tablette + clés de voiture (nouveau modèle CarKeys).
+
+## Cannabis
+- Plants refaits (Tools/GenerateModelsV5.py) : grandes feuilles palmées à 9 folioles dentées et nervurées, rameaux latéraux, colas « queue de renard » (calices empilés,
+  pistils, feuilles de sucre, cristaux), certains calices violacés. Stade 3 : 5 306 triangles (6 680 avant).
+- Sachet de récolte refait : sachet zip transparent avec têtes visibles et étiquette.
+- Récolte : le rendement dépend du moment (3 sachets dans les 5 min après maturité, 2 jusqu'à 10 min, puis 1) ; avant maturité le message indique le temps restant.
+
+## Objets de métier refaits (Tools/GenerateModelsV7.py)
+- PoliceRadio (écran, clavier, PTT, antenne, clip), ArmoryCase (mallette rigide, 3 fermoirs, plaque), WorkGloves (paire haute visibilité), TrashBag (sac noué),
+  ShopCrate (caisse en bois avec produits), WeedBag, et nouveau CarKeys. Avec les modèles de la 5.3.0 (menottes, insignes, trousse, défibrillateur, terminal, etc.),
+  tous les objets liés aux métiers sont maintenant refaits, sauf MoneyPrinter, MobileStand, MissionMarker et PoopPile.
+
 # 5.4.0 (non compilé ici : aucun SDK .NET dans le bac à sable ; à valider par GitHub Actions puis en jeu)
 
 ## Véhicules : vente directe par le concessionnaire (plus de menu d'achat)
@@ -150,3 +183,11 @@
 - **Armes et véhicules du jeu** (Integration/GameItemService.cs) : recherche par titre parmi les crates réellement chargées (aucun code-barres supposé). La liste complète est écrite dans UserData/FusionDarkRP/spawnable-titles.txt pour ajuster les mots-clés. Véhicules : police (service), gangs (25 €, grade >= 1), concessionnaire (démo), autres (achat).
 - **Culture du cannabis pour les gangs** (Integration/DrugFarmService.cs) : planter (40 €, 4 plants max), 3 stades visibles (`WeedPot1/2/3`), récolte = 3 sachets physiques (`WeedBag`), vente au receleur (40–70 €/sachet, +20 % gangs), saisie par la police avec prime, fanaison après 15 min. Menu « Gangs : culture et trafic ».
 - Modèles : trésor municipal, plants, sachet (Tools/GenerateModelsV3.py).
+
+
+# 5.7.0 (non compilé ici — aucun SDK .NET dans le bac à sable)
+- Concessionnaire : catalogue dynamique lu dans l'AssetWarehouse (RP/VehicleInventory.cs) remplaçant la liste figée ; vente par code-barres exact (GameItemService.TryGiveBarcode) ; menu paginé par catégorie (veh.list) ; vehicles.json passe en version 4 (ancien fichier sauvegardé en .ancien.bak).
+- Vente : remboursement automatique si l'apparition échoue ; cooldown après succès seulement ; message si l'ancien véhicule est retiré.
+- Corrigé : GitHub Actions régénérait les modèles avec GenerateModels.py seul (écrasait 49 fichiers V2–V7) -> contrôle Tools/VerifyAssets.py ; Tools/GenerateAll.py ajouté ; version du BUILD_INFO lue dans PROJECT_VERSION.txt.
+- Corrigé : menu cannabis (60 € / 15 min), imprimante (10 € / 30 s, 600 € max), salaire citoyen 50 -> 20 € (migration unique), code mort supprimé (VehicleInfo, IsAvailable, VehicleWords).
+- Prix de chaque véhicule réglable dans le menu concessionnaire (veh.price, RP/VehicleInventory.TrySetPrice) ; les règles Overrides s'appliquent désormais toutes (premier nom/prix/catégorie trouvé).

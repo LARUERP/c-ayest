@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using FusionDarkRP.Economy;
+using FusionDarkRP.RP;
 using LabFusion.SDK.Modules;
 using MelonLoader;
 
@@ -494,6 +495,7 @@ namespace FusionDarkRP.Integration
                 MoneyPrinterService.Update();
                 JobPerks.Update();
                 DrugFarmService.Update();
+                VehicleInventory.Update();
             }
             catch (Exception exception)
             {
@@ -524,6 +526,7 @@ namespace FusionDarkRP.Integration
                 MoneyPrinterService.Reset();
                 JobPerks.Reset();
                 DrugFarmService.Reset();
+                VehicleInventory.Reset();
             }
             catch
             {

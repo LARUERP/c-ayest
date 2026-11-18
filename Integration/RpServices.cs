@@ -24,15 +24,6 @@ namespace FusionDarkRP.Integration
         public string Instruction { get; set; }
     }
 
-    public sealed class VehicleInfo
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public long Price { get; set; }
-        public int Access { get; set; }
-        public bool Installed { get; set; }
-    }
-
     public sealed class InvoiceInfo
     {
         public string Id { get; set; }
@@ -116,6 +107,8 @@ namespace FusionDarkRP.Integration
             RpHub.RegisterHost("mission.advance", MissionAdvance);
             RpHub.RegisterHost("mission.abandon", MissionAbandon);
 
+            RpHub.RegisterHost("veh.list", VehicleList);
+            RpHub.RegisterHost("veh.price", VehiclePrice);
             RpHub.RegisterHost("veh.sell", VehicleSell);
             RpHub.RegisterHost("invoice.create", InvoiceCreate);
             RpHub.RegisterHost("invoice.list", InvoiceList);
@@ -659,8 +652,75 @@ namespace FusionDarkRP.Integration
         }
 
         /// <summary>
+        /// Catalogue des véhicules RÉELLEMENT installés chez l'hôte (jeu + mods mod.io),
+        /// page par page, pour le menu du concessionnaire. L'argument commence par « ! »
+        /// pour forcer une nouvelle lecture (bouton Actualiser).
+        /// </summary>
+        private static RpResponse VehicleList(PlayerID sender, RpRequest request)
+        {
+            if (!string.Equals(Job(sender), "concessionnaire", StringComparison.OrdinalIgnoreCase))
+                return Fail("Réservé au concessionnaire.");
+
+            string category = request.A;
+            bool force = false;
+
+            if (!string.IsNullOrEmpty(category) && category[0] == '!')
+            {
+                force = true;
+                category = category.Substring(1);
+            }
+
+            if (force)
+                VehicleInventory.Refresh(true);
+
+            if (!VehicleInventory.WarehouseReady)
+                return Fail("Les objets de BONELAB sont encore en chargement : réessayez dans quelques secondes.");
+
+            VehicleListData data = VehicleInventory.BuildPage(
+                category, (int)Math.Min(request.N, 1000L), request.S);
+
+            string message = data.Total == 0
+                ? "Aucun véhicule détecté dans BONELAB (voir vehicles.json : Include)."
+                : data.Total + " véhicule(s) disponible(s).";
+
+            return new RpResponse
+            {
+                Ok = true,
+                Msg = message,
+                D = JsonSerializer.Serialize(data)
+            };
+        }
+
+        /// <summary>
+        /// Réglage du prix d'un véhicule par le concessionnaire. A = « id|catégorie|page »,
+        /// N = prix en centimes (0 = prix automatique). Renvoie la page du catalogue à jour.
+        /// </summary>
+        private static RpResponse VehiclePrice(PlayerID sender, RpRequest request)
+        {
+            if (!string.Equals(Job(sender), "concessionnaire", StringComparison.OrdinalIgnoreCase))
+                return Fail("Seul un concessionnaire peut régler les prix.");
+
+            string[] parts = (request.A ?? string.Empty).Split('|');
+            string message;
+
+            if (!VehicleInventory.TrySetPrice(parts[0], request.N, out message))
+                return Fail(message);
+
+            int page = 0;
+
+            if (parts.Length > 2)
+                int.TryParse(parts[2], out page);
+
+            VehicleListData data = VehicleInventory.BuildPage(
+                parts.Length > 1 ? parts[1] : string.Empty, page, request.S);
+
+            return new RpResponse { Ok = true, Msg = message, D = JsonSerializer.Serialize(data) };
+        }
+
+        /// <summary>
         /// Vente de véhicule : réservée au concessionnaire, à un client proche. Une facture est
-        /// envoyée ; le véhicule est livré devant le client quand il la paie.
+        /// envoyée ; le véhicule est livré devant le client quand il la paie. Le véhicule
+        /// doit être installé dans le BONELAB de l'hôte (catalogue dynamique).
         /// </summary>
         private static RpResponse VehicleSell(PlayerID sender, RpRequest request)
         {
@@ -679,16 +739,17 @@ namespace FusionDarkRP.Integration
             if (!Near(sender, target, NearInvoice))
                 return Fail("Le client est trop loin (8 m maximum).");
 
-            VehicleDefinition definition = JobVehicleCatalog.Find(
-                "concessionnaire", EconomyJobResolver.GetGradeIndexFromPlayer(sender), request.A);
+            VehicleDefinition definition;
 
-            if (definition == null)
-                return Fail("Véhicule inconnu du catalogue.");
+            if (!VehicleInventory.TryGet(request.A, out definition))
+                return Fail("Véhicule inconnu : actualisez le catalogue.");
 
-            if (!GameItemService.IsAvailable(definition.Keywords, true))
+            if (!VehicleInventory.IsInstalled(definition))
             {
-                return Fail("« " + definition.Name + " » n'est pas installé dans BONELAB "
-                    + "(vehicles.json / spawnable-titles.txt). Aucune facture créée.");
+                VehicleInventory.Refresh(true);
+
+                return Fail("« " + definition.Name + " » n'est plus chargé dans BONELAB. "
+                    + "Aucune facture créée ; actualisez le catalogue.");
             }
 
             PurgeInvoices();
@@ -713,7 +774,7 @@ namespace FusionDarkRP.Integration
                     FromPid = pid,
                     FromName = Name(sender),
                     ToId = target.SmallID,
-                    Amount = JobVehicleCatalog.EffectivePrice(definition),
+                    Amount = VehicleInventory.EffectivePrice(definition),
                     Label = CleanText(definition.Name, 40),
                     Created = Time.realtimeSinceStartup,
                     VehicleId = definition.Id

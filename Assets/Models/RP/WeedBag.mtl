@@ -1,45 +1,81 @@
-newmtl Plastic
+newmtl Film
 Ka 0.20 0.20 0.20
-Kd 0.850 0.900 0.850
+Kd 0.900 0.950 0.950
 Ks 0.50 0.50 0.50
-Ns 700.0
+Ns 900.0
 Pm 0.00
-d 0.55
+d 0.28
 illum 2
 
 newmtl Seal
 Ka 0.20 0.20 0.20
-Kd 0.200 0.550 0.250
+Kd 0.850 0.900 0.900
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.00
+d 0.70
+illum 2
+
+newmtl Zip
+Ka 0.20 0.20 0.20
+Kd 0.900 0.900 0.920
 Ks 0.50 0.50 0.50
 Ns 300.0
 Pm 0.00
 d 1.00
 illum 2
 
+newmtl ZipBlue
+Ka 0.20 0.20 0.20
+Kd 0.150 0.350 0.850
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl ZipYellow
+Ka 0.20 0.20 0.20
+Kd 0.950 0.800 0.100
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Label
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+map_Kd Weed_Label.png
+d 1.00
+illum 2
+
 newmtl Bud
 Ka 0.20 0.20 0.20
-Kd 0.450 0.620 0.250
+Kd 0.400 0.580 0.220
 Ks 0.50 0.50 0.50
-Ns 140.0
+Ns 150.0
 Pm 0.00
 d 1.00
 illum 2
 
 newmtl Hair
 Ka 0.20 0.20 0.20
-Kd 0.950 0.550 0.100
+Kd 0.960 0.520 0.080
 Ks 0.50 0.50 0.50
 Ns 120.0
 Pm 0.00
-Ke 0.200 0.100 0.000
 d 1.00
 illum 2
 
-newmtl Label
+newmtl BudLight
 Ka 0.20 0.20 0.20
-Kd 0.950 0.950 0.900
+Kd 0.560 0.740 0.320
 Ks 0.50 0.50 0.50
-Ns 100.0
+Ns 150.0
 Pm 0.00
 d 1.00
 illum 2

@@ -10,7 +10,7 @@ namespace FusionDarkRP.Integration
 {
     /// <summary>
     /// Culture du cannabis (hôte autoritaire), réservée aux gangs :
-    ///  planter (40 €) -> semis -> croissance -> plante mûre -> récolte
+    ///  planter (60 €) -> semis -> croissance -> plante mûre -> récolte
     ///  (3 sachets physiques saisissables) -> vente au receleur (menu).
     /// La police peut saisir plants et sachets (prime). Une plante mûre non
     /// récoltée fane au bout de 15 minutes.
@@ -18,11 +18,15 @@ namespace FusionDarkRP.Integration
     public static class DrugFarmService
     {
         private const float TickInterval = 2f;
-        private const float Stage2After = 150f;
-        private const float Stage3After = 330f;
-        private const float WitherAfter = 330f + 900f;
+        private const float Stage2After = 300f;
+        private const float Stage3After = 900f;
+        private const float WitherAfter = Stage3After + 900f;
         private const int MaxPlantsPerPlayer = 4;
-        private const long SeedCents = 4000L;
+        /// <summary>Prix d'un semis (affiché dans le menu : une seule source de vérité).</summary>
+        public const long SeedCents = 6000L;
+
+        /// <summary>Durée de croissance jusqu'à la maturité (secondes).</summary>
+        public const float MatureAfterSeconds = Stage3After;
         private const int BagsPerHarvest = 3;
         private const float HarvestReach = 2.8f;
         private const float SellReach = 4f;
@@ -269,14 +273,29 @@ namespace FusionDarkRP.Integration
                 return Fail("Aucune plante à portée (" + HarvestReach + " m).");
 
             if (best.Stage < 3)
-                return Fail("Cette plante n'est pas encore mûre.");
+            {
+                float remaining = Stage3After - (Time.unscaledTime - best.PlantedAt);
+                int minutes = Mathf.Max(1, Mathf.CeilToInt(remaining / 60f));
+
+                return Fail("Cette plante n'est pas encore mûre (encore ~" + minutes + " min).");
+            }
+
+            // Rendement selon le moment de la récolte : plus on attend après la maturité,
+            // moins la récolte est bonne (la plante fane au bout de 15 min).
+            float sinceMature = Time.unscaledTime - best.PlantedAt - Stage3After;
+            int bags = sinceMature <= 300f
+                ? BagsPerHarvest
+                : sinceMature <= 600f ? Mathf.Max(1, BagsPerHarvest - 1) : 1;
+            string quality = sinceMature <= 300f
+                ? "excellente"
+                : sinceMature <= 600f ? "correcte" : "passée";
 
             Vector3 origin = best.Position + Vector3.up * 0.35f;
             int made = 0;
 
-            for (int i = 0; i < BagsPerHarvest; i++)
+            for (int i = 0; i < bags; i++)
             {
-                float angle = i * (Mathf.PI * 2f / BagsPerHarvest);
+                float angle = i * (Mathf.PI * 2f / bags);
 
                 Vector3 position = origin + new Vector3(
                     Mathf.Cos(angle) * 0.25f, 0f, Mathf.Sin(angle) * 0.25f);
@@ -314,7 +333,7 @@ namespace FusionDarkRP.Integration
                 Plants.Remove(best);
             }
 
-            return Ok("Récolte : " + made + " sachets. Vendez-les au receleur.");
+            return Ok("Récolte " + quality + " : " + made + " sachet(s). Vendez-les au receleur.");
         }
 
         private static RpResponse HandleSell(PlayerID sender, RpRequest request)
@@ -350,7 +369,7 @@ namespace FusionDarkRP.Integration
                     break;
 
                 // Prix de rue variable ; les gangs connaissent les bons réseaux.
-                long price = (long)(UnityEngine.Random.Range(40, 71) * 100);
+                long price = (long)(UnityEngine.Random.Range(25, 51) * 100);
 
                 if (gang)
                     price = (long)(price * 1.2);
@@ -405,21 +424,21 @@ namespace FusionDarkRP.Integration
                 Destroy(Plants[i].ObjectId);
                 Plants.RemoveAt(i);
                 plants++;
-                reward += 2500L;
+                reward += 8000L;
             }
 
             foreach (string id in FindObjects("WeedBag", body.position, SeizeReach))
             {
                 Destroy(id);
                 bags++;
-                reward += 1500L;
+                reward += 4000L;
             }
 
             if (plants + bags == 0)
                 return Fail("Rien à saisir à moins de " + SeizeReach + " m.");
 
-            if (reward > 30000L)
-                reward = 30000L;
+            if (reward > 50000L)
+                reward = 50000L;
 
             string error;
 

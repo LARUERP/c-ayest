@@ -142,15 +142,6 @@ namespace FusionDarkRP.Integration
             return false;
         }
 
-        /// <summary>Vrai si au moins un objet du jeu correspond aux mots-clés (sans rien créer).</summary>
-        public static bool IsAvailable(string[] keywords, bool wholeWord)
-        {
-            Spawnable spawnable;
-            string title;
-
-            return TryFind(keywords, wholeWord, out spawnable, out title);
-        }
-
         /// <summary>
         /// Écrit la liste des objets chargés dans
         /// UserData/FusionDarkRP/spawnable-titles.txt (aide au réglage des
@@ -191,6 +182,51 @@ namespace FusionDarkRP.Integration
         }
 
         /// <summary>
+        /// Vrai si la crate de ce code-barres est chargée dans BONELAB (sans rien créer).
+        /// </summary>
+        public static bool CanSpawn(string barcode)
+        {
+            Spawnable spawnable;
+
+            return TryResolveBarcode(barcode, out spawnable);
+        }
+
+        /// <summary>Résout un code-barres EXACT (véhicules du catalogue dynamique).</summary>
+        public static bool TryResolveBarcode(string barcode, out Spawnable spawnable)
+        {
+            spawnable = null;
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(barcode) || !AssetWarehouse.ready ||
+                    AssetWarehouse.Instance == null)
+                {
+                    return false;
+                }
+
+                SpawnableCrateReference reference = new SpawnableCrateReference(barcode);
+
+                if (reference.Crate == null)
+                    return false;
+
+                spawnable = new Spawnable
+                {
+                    crateRef = reference,
+                    policyData = null
+                };
+
+                return true;
+            }
+            catch (Exception exception)
+            {
+                MelonLogger.Warning(
+                    "[FusionDarkRP Items] Code-barres : " + exception.Message);
+
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Crée l'objet devant le joueur. bucket : groupe de suivi
         /// (ex. "pid|kit", "pid|veh") pour le retirer plus tard.
         /// </summary>
@@ -205,6 +241,26 @@ namespace FusionDarkRP.Integration
             if (!TryFind(keywords, wholeWord, out spawnable, out title))
                 return false;
 
+            return SpawnTracked(bucket, spawnable, position, rotation);
+        }
+
+        /// <summary>Crée l'objet désigné par un code-barres exact (véhicules vendus).</summary>
+        public static bool TryGiveBarcode(
+            string bucket, string barcode,
+            Vector3 position, Quaternion rotation)
+        {
+            Spawnable spawnable;
+
+            if (!TryResolveBarcode(barcode, out spawnable))
+                return false;
+
+            return SpawnTracked(bucket, spawnable, position, rotation);
+        }
+
+        private static bool SpawnTracked(
+            string bucket, Spawnable spawnable,
+            Vector3 position, Quaternion rotation)
+        {
             try
             {
                 string tracked = bucket;

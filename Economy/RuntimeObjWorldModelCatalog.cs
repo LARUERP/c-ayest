@@ -232,6 +232,12 @@ namespace FusionDarkRP.Economy
                         WorldModelCategory.RpEquipment, false, false)
                 },
                 {
+                    "CarKeys",
+                    new WorldModelDefinition(
+                        "CarKeys", "Clés de voiture (concessionnaire)",
+                        WorldModelCategory.RpEquipment, true, false)
+                },
+                {
                     "WeedBag",
                     new WorldModelDefinition(
                         "WeedBag", "Sachet de récolte",

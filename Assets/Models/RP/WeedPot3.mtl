@@ -62,15 +62,6 @@ map_Kd Weed_Leaf.png
 d 1.00
 illum 2
 
-newmtl BudLight
-Ka 0.20 0.20 0.20
-Kd 0.550 0.720 0.320
-Ks 0.50 0.50 0.50
-Ns 150.0
-Pm 0.00
-d 1.00
-illum 2
-
 newmtl Bud
 Ka 0.20 0.20 0.20
 Kd 0.400 0.580 0.220
@@ -87,6 +78,24 @@ Ks 0.50 0.50 0.50
 Ns 120.0
 Pm 0.00
 Ke 0.180 0.080 0.000
+d 1.00
+illum 2
+
+newmtl BudLight
+Ka 0.20 0.20 0.20
+Kd 0.550 0.720 0.320
+Ks 0.50 0.50 0.50
+Ns 150.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl BudPurple
+Ka 0.20 0.20 0.20
+Kd 0.360 0.300 0.460
+Ks 0.50 0.50 0.50
+Ns 150.0
+Pm 0.00
 d 1.00
 illum 2
 

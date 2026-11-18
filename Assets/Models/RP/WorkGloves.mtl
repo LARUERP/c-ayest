@@ -1,27 +1,45 @@
-newmtl Glove
+newmtl Hi
 Ka 0.20 0.20 0.20
-Kd 0.850 0.650 0.120
+Kd 0.950 0.420 0.060
 Ks 0.50 0.50 0.50
-Ns 180.0
+Ns 60.0
 Pm 0.00
-map_Kd Leather.png
+d 1.00
+illum 2
+
+newmtl Palm
+Ka 0.20 0.20 0.20
+Kd 0.250 0.260 0.280
+Ks 0.50 0.50 0.50
+Ns 100.0
+Pm 0.00
 d 1.00
 illum 2
 
 newmtl Cuff
 Ka 0.20 0.20 0.20
-Kd 0.120 0.120 0.140
+Kd 0.140 0.150 0.170
 Ks 0.50 0.50 0.50
-Ns 200.0
+Ns 60.0
 Pm 0.00
 d 1.00
 illum 2
 
-newmtl Grip
+newmtl Reflect
 Ka 0.20 0.20 0.20
-Kd 0.080 0.080 0.090
+Kd 0.850 0.880 0.750
 Ks 0.50 0.50 0.50
-Ns 120.0
+Ns 900.0
+Pm 0.00
+Ke 0.120 0.130 0.100
+d 1.00
+illum 2
+
+newmtl Pad
+Ka 0.20 0.20 0.20
+Kd 0.070 0.070 0.080
+Ks 0.50 0.50 0.50
+Ns 140.0
 Pm 0.00
 d 1.00
 illum 2

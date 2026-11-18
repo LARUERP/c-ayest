@@ -1,16 +1,24 @@
-newmtl Case
+newmtl Shell
 Ka 0.20 0.20 0.20
-Kd 1.000 1.000 1.000
+Kd 0.080 0.085 0.090
 Ks 0.50 0.50 0.50
-Ns 420.0
-Pm 0.00
-map_Kd Carbon.png
+Ns 350.0
+Pm 0.15
 d 1.00
 illum 2
 
 newmtl Seam
 Ka 0.20 0.20 0.20
-Kd 0.030 0.030 0.035
+Kd 0.020 0.020 0.025
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Rib
+Ka 0.20 0.20 0.20
+Kd 0.100 0.105 0.110
 Ks 0.50 0.50 0.50
 Ns 300.0
 Pm 0.00
@@ -19,28 +27,74 @@ illum 2
 
 newmtl Latch
 Ka 0.20 0.20 0.20
-Kd 0.850 0.700 0.300
+Kd 0.900 0.550 0.080
 Ks 0.50 0.50 0.50
-Ns 700.0
-Pm 1.00
+Ns 300.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl LatchDark
+Ka 0.20 0.20 0.20
+Kd 0.050 0.050 0.060
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Hinge
+Ka 0.20 0.20 0.20
+Kd 0.120 0.120 0.130
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
 d 1.00
 illum 2
 
 newmtl Handle
 Ka 0.20 0.20 0.20
-Kd 0.100 0.100 0.120
+Kd 0.120 0.120 0.130
 Ks 0.50 0.50 0.50
-Ns 500.0
+Ns 300.0
 Pm 0.00
+d 1.00
+illum 2
+
+newmtl Grip
+Ka 0.20 0.20 0.20
+Kd 0.900 0.550 0.080
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Valve
+Ka 0.20 0.20 0.20
+Kd 0.600 0.620 0.660
+Ks 0.50 0.50 0.50
+Ns 700.0
+Pm 0.90
+d 1.00
+illum 2
+
+newmtl Plate
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 400.0
+Pm 0.00
+map_Kd Armory_Label.png
 d 1.00
 illum 2
 
 newmtl Corner
 Ka 0.20 0.20 0.20
-Kd 0.550 0.560 0.600
+Kd 0.050 0.050 0.055
 Ks 0.50 0.50 0.50
-Ns 650.0
-Pm 1.00
+Ns 150.0
+Pm 0.00
 d 1.00
 illum 2
 

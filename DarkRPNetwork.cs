@@ -210,9 +210,9 @@ namespace FusionDarkRP
                 DarkRPNetwork.NotifyPlayer(
                     target.SmallID, data.Team, data.Grade);
 
-                // Les annonces collectives concernent les equipes 1 a 10,
-                // Armurerie comprise.
-                if (oldTeam >= 1 && oldTeam <= 10 &&
+                // Les annonces collectives concernent les equipes 1 a 11,
+                // Armurerie et concession comprises.
+                if (oldTeam >= 1 && oldTeam <= 11 &&
                     data.Team == oldTeam &&
                     oldGrade != data.Grade)
                 {
@@ -234,7 +234,7 @@ namespace FusionDarkRP
                 }
                 else
                 {
-                    if (oldTeam >= 1 && oldTeam <= 10 &&
+                    if (oldTeam >= 1 && oldTeam <= 11 &&
                         oldTeam != data.Team)
                     {
                         DarkRPNetwork.NotifyFaction(
@@ -245,7 +245,7 @@ namespace FusionDarkRP
                             oldGrade);
                     }
 
-                    if (data.Team >= 1 && data.Team <= 10 &&
+                    if (data.Team >= 1 && data.Team <= 11 &&
                         oldTeam != data.Team)
                     {
                         DarkRPNetwork.NotifyFaction(

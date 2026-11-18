@@ -1,4 +1,4 @@
-# Fusion DarkRP Ultimate 3.0.0 — BONELAB Quest / LabFusion
+# Fusion DarkRP Ultimate 5.7.0 — BONELAB Quest / LabFusion
 
 Un seul mod (une seule DLL : `FusionDarkRPUltimate.dll`) : économie en euros, banque, ATM, cartes, argent physique saisissable, téléphone, porte/coffres de banque, métiers DarkRP, missions, factures, police, soins, administration.
 
@@ -8,7 +8,7 @@ Un seul mod (une seule DLL : `FusionDarkRPUltimate.dll`) : économie en euros, b
 3. Local : `dotnet build FusionDarkRP-Ultimate.sln -c Release` (SDK .NET 6). Sortie : `bin/Release/FusionDarkRPUltimate.dll`.
 
 ## Installation (Quest)
-- Prérequis : MelonLoader 0.7, BoneLib, LabFusion (+ Fusion Helper). Les DLL de `Libs/` correspondent exactement (même empreinte) à celles de votre installation.
+- Prérequis : MelonLoader 0.6.5 (version des bibliothèques de Libs/), BoneLib, LabFusion (+ Fusion Helper). Les DLL de `Libs/` correspondent exactement (même empreinte) à celles de votre installation.
 - Copiez `FusionDarkRPUltimate.dll` dans `Mods/`.
 - **Supprimez les anciens mods concurrents** de `Mods/` : `DarkRPModule.dll`, `LabRP.dll`, `MoneyLab.dll`, `BonelabRP.Telephone.dll` (le téléphone est désormais intégré). Les données du téléphone restent dans `UserData/BonelabRP/Telephone`.
 - Tous les joueurs doivent avoir la même version.
@@ -29,7 +29,7 @@ Les billets, pièces, liasses et objets mobiles sont créés comme un vrai objet
 
 ## Modèles 3D et textures (refonte complète)
 Tous les modèles sont **originaux** (générés par `Tools/GenerateModels.py`, aucune licence tierce) : billets 5 à 100 € légèrement bombés avec recto/verso imprimés, pièces euro avec rebord et face texturée, liasses sanglées, carte bancaire à coins arrondis (puce, recto/verso), ATM (écran, clavier, lecteur, distributeur, enseigne lumineuse), coffre-fort à porte ronde, porte de sécurité à charnières (+ cadre de porte séparé), coffre mural (cadran, poignée, clavier), bureau avec écran vertical, comptoir vitré, chaise, et 12 accessoires de métiers. Normales lissées, UV, textures PNG (49 fichiers, 512 px max), matériaux métal/émissif. Budget Quest : ATM ≈ 3,8 k triangles, coffre-fort ≈ 6 k, porte ≈ 2,3 k, billets ≈ 130, pièces ≈ 450.
-Pour modifier un modèle : éditer `Tools/GenerateModels.py` puis `python3 Tools/GenerateModels.py` (Pillow + numpy). Vous pouvez aussi remplacer un `.obj/.mtl/.png` à la main en respectant le nom (les textures s'écrivent `map_Kd Nom.png` dans le `.mtl`).
+Pour modifier un modèle : éditer `Tools/GenerateModels.py` puis `python3 Tools/GenerateAll.py` (Pillow + numpy). Vous pouvez aussi remplacer un `.obj/.mtl/.png` à la main en respectant le nom (les textures s'écrivent `map_Kd Nom.png` dans le `.mtl`).
 Porte de sécurité : placez d'abord **Cadre de porte de sécurité** puis **Porte de sécurité bancaire** à la même position et orientation.
 
 ## Documents
@@ -60,3 +60,25 @@ de véhicules : adaptez `UserData/FusionDarkRP/vehicles.json` aux titres listés
 **Téléphone** : si la photo ou la visio est noire, regardez le journal MelonLoader : « Caméra téléphone : stratégie N ».
 
 **Cartes bancaires** : nominatives, une seule carte active par personnage ; une nouvelle carte invalide l'ancienne.
+
+
+---
+
+## Nouveautés 5.5.0
+- **Concessionnaire** : nommé par l'hôte via Joueurs connectés > joueur > Recrutement / gestion > Concession automobile. Seul lui vend des véhicules.
+- **Cannabis** : plants et sachets refaits ; le rendement de la récolte dépend du moment (récoltez dans les 5 minutes après maturité pour 3 sachets).
+- **Objets de métier** refaits (voir CHANGELOG_EOS.md), clés de voiture pour le concessionnaire.
+
+
+## Nouveautés 5.6.0 — équilibrage
+- Véhicules : de 150 EUR (vélo) à 3 000 EUR (Golf). Si vous aviez modifié `vehicles.json`, retrouvez-le en `.bak` après le premier lancement.
+- Cannabis : culture plus lente (15 min) et revente plus basse, pour rester cohérent avec les salaires et les missions.
+- Équipement des métiers : grades minimum respectés (voir le catalogue d'équipement).
+
+
+## Nouveautés 5.7.0
+- **Concessionnaire dynamique** : il vend TOUS les véhicules installés dans le BONELAB de l'hôte (jeu + mod.io), détectés par tag ou par titre. Un véhicule téléchargé en cours de partie apparaît seul (relecture toutes les 60 s) ou via « Actualiser » dans Joueurs connectés > client > Actions RP > Vendre un véhicule (catégories, pages).
+- Fichiers dans `UserData/FusionDarkRP/` : `vehicles.json` (Include, Exclude, Overrides nom/prix/catégorie, PriceMultiplier), `vehicles-detected.txt`, `spawnable-catalog.txt`. Si un véhicule n'est pas reconnu : ajoutez un extrait de son titre dans `Include`.
+- Vente : remboursement automatique si le véhicule n'apparaît pas ; délai entre achats appliqué seulement après une vente réussie ; un nouvel achat retire l'ancien véhicule.
+- Cohérence : cannabis (semis 60 €, maturité 15 min, revente 25–50 €), imprimante 10 €/30 s (bac 600 €), salaire citoyen 20 € (migration unique), GitHub Actions ne réécrase plus les modèles.
+- **Prix réglables en jeu** : dans « Vendre un véhicule », bouton « Mode : régler les prix » ; chaque véhicule propose -1000/-500/-100/+100/+500/+1000 EUR ou « Prix automatique ». Enregistré dans vehicles.json (Overrides).

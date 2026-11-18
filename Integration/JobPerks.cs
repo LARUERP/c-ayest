@@ -27,9 +27,6 @@ namespace FusionDarkRP.Integration
         private const double DealerCommission = 0.15;
         private const string TreasuryWallet = "system:town_treasury";   // même portefeuille que RpServices, DrugFarmService et BankSecurity
 
-        private static readonly string[] VehicleWords =
-            { "jalopy", "buggy", "truck", "van", "car", "cart", "scooter", "bike", "vehicle" };
-
         private sealed class Kit
         {
             public string[] Models = new string[0];
@@ -98,9 +95,32 @@ namespace FusionDarkRP.Integration
                     break;
 
                 case "concessionnaire":
-                    kit.Models = new[] { "BusinessTablet" };
+                    kit.Models = new[] { "BusinessTablet", "CarKeys" };
                     break;
             }
+
+            // Les objets suivent le catalogue d'équipement : grade minimum respecté.
+            List<string> allowed = new List<string>();
+
+            foreach (string model in kit.Models)
+            {
+                bool permitted = true;
+
+                foreach (EquipmentDefinition item in JobEquipmentCatalog.All)
+                {
+                    if (string.Equals(item.JobId, job, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(item.ModelResource, model, StringComparison.Ordinal))
+                    {
+                        permitted = grade >= item.MinimumGrade;
+                        break;
+                    }
+                }
+
+                if (permitted)
+                    allowed.Add(model);
+            }
+
+            kit.Models = allowed.ToArray();
 
             return kit;
         }
@@ -384,7 +404,8 @@ namespace FusionDarkRP.Integration
         /// <summary>
         /// Finalise une vente de véhicule au paiement de la facture : contrôles, paiement
         /// (commission au concessionnaire, reste au trésor), puis apparition du véhicule
-        /// devant l'acheteur. Retourne faux sans rien débiter si un contrôle échoue.
+        /// devant l'acheteur. Retourne faux sans rien débiter si un contrôle échoue, et
+        /// REMBOURSE automatiquement si l'apparition échoue après le paiement.
         /// </summary>
         public static bool CompleteVehicleSale(
             PlayerID buyer, string buyerPid, string vehicleId,
@@ -408,21 +429,21 @@ namespace FusionDarkRP.Integration
                 return false;
             }
 
-            VehicleDefinition definition = JobVehicleCatalog.Find(
-                "concessionnaire",
-                EconomyJobResolver.GetGradeIndexFromPlayer(dealer), vehicleId);
+            VehicleDefinition definition;
 
-            if (definition == null)
+            if (!VehicleInventory.TryGet(vehicleId, out definition))
             {
                 message = "Ce véhicule n'est plus au catalogue.";
                 return false;
             }
 
             // Le véhicule doit exister dans le jeu AVANT tout paiement.
-            if (!GameItemService.IsAvailable(definition.Keywords, true))
+            if (!VehicleInventory.IsInstalled(definition))
             {
-                message = "« " + definition.Name + " » n'est pas installé dans BONELAB "
-                    + "(voir vehicles.json et spawnable-titles.txt). Aucun paiement effectué.";
+                VehicleInventory.Refresh(true);
+
+                message = "« " + definition.Name + " » n'est plus chargé dans BONELAB. "
+                    + "Aucun paiement effectué.";
                 return false;
             }
 
@@ -434,7 +455,7 @@ namespace FusionDarkRP.Integration
                 return false;
             }
 
-            long price = JobVehicleCatalog.EffectivePrice(definition);
+            long price = VehicleInventory.EffectivePrice(definition);
             WalletData wallet = runtime.Wallets.GetWallet(buyerPid);
 
             if (wallet == null ||
@@ -445,7 +466,10 @@ namespace FusionDarkRP.Integration
                 return false;
             }
 
-            if (!Cooldown("veh|" + buyerPid, VehicleCooldown))
+            string cooldownKey = "veh|" + buyerPid;
+            float until;
+
+            if (Cooldowns.TryGetValue(cooldownKey, out until) && Time.unscaledTime < until)
             {
                 message = "Un véhicule vient d'être livré, patientez avant le suivant.";
                 return false;
@@ -453,14 +477,15 @@ namespace FusionDarkRP.Integration
 
             bool fromBank = wallet.BankCents >= price;
             long commission = (long)(price * DealerCommission);
+            long toTreasury = price - commission;
             string error;
 
             // Le plus gros montant d'abord : en cas d'échec, rien n'est débité.
             bool paid = fromBank
                 ? runtime.Wallets.TryTransfer(true, PhysicalCashRequestId.Create(),
-                    buyerPid, TreasuryWallet, price - commission, out error)
+                    buyerPid, TreasuryWallet, toTreasury, out error)
                 : runtime.Wallets.TryMoveCashToWalletBank(true, PhysicalCashRequestId.Create(),
-                    buyerPid, TreasuryWallet, price - commission, out error);
+                    buyerPid, TreasuryWallet, toTreasury, out error);
 
             if (!paid)
             {
@@ -468,19 +493,21 @@ namespace FusionDarkRP.Integration
                 return false;
             }
 
+            bool commissionPaid = false;
+
             if (commission > 0)
             {
-                bool paidDealer = fromBank
+                commissionPaid = fromBank
                     ? runtime.Wallets.TryTransfer(true, PhysicalCashRequestId.Create(),
                         buyerPid, dealerPid, commission, out error)
                     : runtime.Wallets.TryMoveCashToWalletBank(true, PhysicalCashRequestId.Create(),
                         buyerPid, dealerPid, commission, out error);
 
-                if (!paidDealer)
+                if (!commissionPaid)
                     MelonLogger.Warning("[FusionDarkRP Véhicules] Commission non versée : " + error);
             }
 
-            GameItemService.Release(buyerPid + "|veh");
+            int replaced = GameItemService.Release(buyerPid + "|veh");
 
             Vector3 forward = body.forward;
             forward.y = 0f;
@@ -490,24 +517,45 @@ namespace FusionDarkRP.Integration
 
             forward.Normalize();
 
-            string title;
+            float distance = definition.SpawnDistance > 0f ? definition.SpawnDistance : 3.5f;
 
-            bool ok = GameItemService.TryGive(
-                buyerPid + "|veh", definition.Keywords, true,
-                body.position + forward * 3.5f - Vector3.up * 0.8f,
-                Quaternion.LookRotation(forward, Vector3.up), out title);
+            bool ok = GameItemService.TryGiveBarcode(
+                buyerPid + "|veh", definition.Barcode,
+                body.position + forward * distance - Vector3.up * 0.8f,
+                Quaternion.LookRotation(forward, Vector3.up));
 
             if (!ok)
             {
                 MelonLogger.Warning("[FusionDarkRP Véhicules] Apparition échouée après paiement : "
-                    + buyerPid + " / " + definition.Id);
+                    + buyerPid + " / " + definition.Name);
 
-                message = "Paiement effectué mais le véhicule n'a pas pu apparaître : "
-                    + "demandez au concessionnaire de vous rembourser.";
+                // Remboursement automatique (sur le compte bancaire de l'acheteur).
+                bool refunded = runtime.Wallets.TryTransfer(true, PhysicalCashRequestId.Create(),
+                    TreasuryWallet, buyerPid, toTreasury, out error);
+
+                if (refunded && commissionPaid)
+                {
+                    refunded = runtime.Wallets.TryTransfer(true, PhysicalCashRequestId.Create(),
+                        dealerPid, buyerPid, commission, out error);
+                }
+
+                if (refunded)
+                {
+                    message = "Le véhicule n'a pas pu apparaître : vous avez été remboursé "
+                        + "sur votre compte. Réessayez dans un instant.";
+                    return false;
+                }
+
+                message = "Paiement effectué mais le véhicule n'a pas pu apparaître et le "
+                    + "remboursement automatique a échoué : demandez à l'hôte de vous rembourser.";
                 return true;
             }
 
-            message = definition.Name + " livré (" + BankService.FormatAmount(price) + ").";
+            Cooldowns[cooldownKey] = Time.unscaledTime + VehicleCooldown;
+
+            message = definition.Name + " livré (" + BankService.FormatAmount(price) + ")."
+                + (replaced > 0 ? " Votre ancien véhicule a été retiré." : string.Empty);
+
             return true;
         }
 

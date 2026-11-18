@@ -23,6 +23,11 @@ namespace FusionDarkRP.Integration
         private static Page wantedPage;
         private static bool subscribed;
 
+        // Pages « Vendre un véhicule » du concessionnaire, par joueur cible (SmallID).
+        private static readonly Dictionary<int, Page> sellPages = new Dictionary<int, Page>();
+        private static VehicleListData lastVehicleData;
+        private static bool priceMode;
+
         private static readonly long[] InvoiceAmounts =
             { 1000, 2000, 5000, 10000, 25000, 50000 };
 
@@ -34,6 +39,9 @@ namespace FusionDarkRP.Integration
             missionsPage = null;
             invoicesPage = null;
             wantedPage = null;
+            sellPages.Clear();
+            lastVehicleData = null;
+            priceMode = false;
 
             if (subscribed)
             {
@@ -80,7 +88,7 @@ namespace FusionDarkRP.Integration
 
             Page farm = MenuKit.NewPage(main, "Gangs : culture et trafic", Color.magenta);
 
-            MenuKit.AddFunction(farm, "Planter du cannabis (40 EUR)", Color.green,
+            MenuKit.AddFunction(farm, "Planter du cannabis (" + BankService.FormatAmount(DrugFarmService.SeedCents) + ")", Color.green,
                 () => RpHub.Send("drug.plant"));
             MenuKit.AddFunction(farm, "Récolter la plante proche", Color.yellow,
                 () => RpHub.Send("drug.harvest"));
@@ -89,7 +97,7 @@ namespace FusionDarkRP.Integration
             MenuKit.AddFunction(farm, "Police : saisir plants et sachets proches", Color.blue,
                 () => RpHub.Send("drug.seize"));
             MenuKit.AddInfo(farm,
-                "Semis -> croissance -> plante mûre (~5 min) -> 3 sachets à revendre.",
+                "Semis -> croissance -> plante mûre (~" + (int)(DrugFarmService.MatureAfterSeconds / 60f) + " min) -> 3 sachets à revendre.",
                 Color.white, "[Fusion DarkRP]");
 
             Page admin = MenuKit.NewPage(main, "Administration (hôte)", Color.red);
@@ -134,23 +142,8 @@ namespace FusionDarkRP.Integration
                 if (IsLocalDealer())
                 {
                     Page sell = MenuKit.NewPage(actions, "Vendre un véhicule", Color.cyan);
-
-                    foreach (VehicleDefinition vehicle in JobVehicleCatalog.ForJob("concessionnaire", 0))
-                    {
-                        string vehicleId = vehicle.Id;
-
-                        MenuKit.AddFunction(
-                            sell,
-                            vehicle.Name + " : " + BankService.FormatAmount(
-                                JobVehicleCatalog.EffectivePrice(vehicle)),
-                            Color.cyan,
-                            () => RpHub.Send("veh.sell", vehicleId, 0, target));
-                    }
-
-                    MenuKit.AddInfo(sell,
-                        "Le client doit être à moins de 8 m. Il reçoit une offre à payer (menu Factures) ; "
-                        + "le véhicule apparaît devant lui au paiement.",
-                        Color.white, "[Fusion DarkRP]");
+                    sellPages[target] = sell;
+                    ResetSellPage(sell, target);
                 }
 
                 Page police = MenuKit.NewPage(actions, "Police", Color.blue);
@@ -205,6 +198,141 @@ namespace FusionDarkRP.Integration
                 MenuKit.AddFunction(admin, "Donner 1000 EUR", Color.green,
                     () => RpHub.Send("admin.give", null, 100000, target));
             }
+        }
+
+        private static void ResetSellPage(Page page, byte target)
+        {
+            if (page == null)
+                return;
+
+            page.RemoveAll();
+
+            MenuKit.AddFunction(page, "Charger le catalogue (véhicules installés)", Color.cyan,
+                () => RpHub.Send("veh.list", "!", 0, target));
+
+            MenuKit.AddInfo(page,
+                "Catalogue lu dans le BONELAB de l'hôte (jeu + mods). Client à moins de 8 m ; "
+                + "il reçoit une offre à payer (menu Factures).",
+                Color.white, "[Fusion DarkRP]");
+        }
+
+        private static void BuildVehicles(RpResponse response)
+        {
+            if (!response.Ok)
+            {
+                RpHub.Notify(response.Msg, 2);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(response.D))
+                return;
+
+            VehicleListData parsed = JsonSerializer.Deserialize<VehicleListData>(response.D);
+
+            if (parsed == null)
+                return;
+
+            lastVehicleData = parsed;
+            RenderVehicles(parsed);
+        }
+
+        private static void RenderVehicles(VehicleListData data)
+        {
+            Page page;
+
+            if (!sellPages.TryGetValue(data.Target, out page) || page == null)
+                return;
+
+            byte target = (byte)data.Target;
+            string currentCategory = data.Cat ?? string.Empty;
+            int currentPage = data.Page;
+
+            page.RemoveAll();
+
+            MenuKit.AddFunction(page, "Actualiser (nouveaux mods)", Color.cyan,
+                () => RpHub.Send("veh.list", "!" + currentCategory, currentPage, target));
+
+            MenuKit.AddFunction(page,
+                priceMode ? "Mode : REGLER LES PRIX (toucher pour vendre)" : "Mode : VENDRE (toucher pour régler les prix)",
+                priceMode ? Color.yellow : Color.white,
+                () =>
+                {
+                    priceMode = !priceMode;
+
+                    if (lastVehicleData != null)
+                        RenderVehicles(lastVehicleData);
+                });
+
+            if (data.Cats != null)
+            {
+                foreach (VehicleCategoryInfo info in data.Cats)
+                {
+                    string key = info.K;
+                    bool selected = key == currentCategory;
+
+                    MenuKit.AddFunction(page,
+                        (selected ? "> " : "") + info.N + " (" + info.C + ")",
+                        selected ? Color.yellow : Color.white,
+                        () => RpHub.Send("veh.list", key, 0, target));
+                }
+            }
+
+            if (data.Items == null || data.Items.Count == 0)
+            {
+                MenuKit.AddInfo(page,
+                    "Aucun véhicule détecté. Installez-en via mod.io puis actualisez.",
+                    Color.white, "[Fusion DarkRP]");
+                return;
+            }
+
+            foreach (VehicleItemInfo item in data.Items)
+            {
+                string vehicleId = item.I;
+                string label = item.N + (item.S == "Mod" ? " [mod]" : "") + " : " + BankService.FormatAmount(item.P);
+
+                if (!priceMode)
+                {
+                    MenuKit.AddFunction(page, label, Color.green,
+                        () => RpHub.Send("veh.sell", vehicleId, 0, target));
+                    continue;
+                }
+
+                long current = item.P;
+                string key = vehicleId + "|" + currentCategory + "|" + currentPage;
+                Page priceSub = MenuKit.NewPage(page, "Prix : " + label, Color.yellow);
+
+                foreach (long step in new long[] { -100000, -50000, -10000, 10000, 50000, 100000 })
+                {
+                    long next = Math.Max(10000L, current + step);
+
+                    MenuKit.AddFunction(priceSub,
+                        (step > 0 ? "+" : "") + (step / 100) + " EUR  ->  " + BankService.FormatAmount(next),
+                        step > 0 ? Color.green : Color.red,
+                        () => RpHub.Send("veh.price", key, next, target));
+                }
+
+                MenuKit.AddFunction(priceSub, "Prix automatique", Color.cyan,
+                    () => RpHub.Send("veh.price", key, 0, target));
+            }
+
+            if (data.Page > 0)
+            {
+                MenuKit.AddFunction(page,
+                    "< Page précédente (" + data.Page + "/" + data.Pages + ")", Color.white,
+                    () => RpHub.Send("veh.list", currentCategory, currentPage - 1, target));
+            }
+
+            if (data.Page < data.Pages - 1)
+            {
+                MenuKit.AddFunction(page,
+                    "Page suivante (" + (data.Page + 2) + "/" + data.Pages + ") >", Color.white,
+                    () => RpHub.Send("veh.list", currentCategory, currentPage + 1, target));
+            }
+
+            MenuKit.AddInfo(page,
+                "Page " + (data.Page + 1) + "/" + data.Pages + " - " + data.Total
+                + " véhicule(s) installé(s).",
+                Color.white, "[Fusion DarkRP]");
         }
 
         private static bool IsLocalDealer()
@@ -297,6 +425,17 @@ namespace FusionDarkRP.Integration
 
                     case "wanted.list":
                         BuildWanted(response);
+                        return;
+
+                    case "veh.list":
+                        BuildVehicles(response);
+                        return;
+
+                    case "veh.price":
+                        if (response.Ok && !string.IsNullOrWhiteSpace(response.D))
+                            BuildVehicles(response);
+
+                        RpHub.Notify(response.Msg, (byte)(response.Ok ? 0 : 2));
                         return;
 
                     case "invoice.new":

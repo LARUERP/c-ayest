@@ -1,0 +1,101 @@
+newmtl Fob
+Ka 0.20 0.20 0.20
+Kd 0.050 0.050 0.055
+Ks 0.50 0.50 0.50
+Ns 800.0
+Pm 0.30
+d 1.00
+illum 2
+
+newmtl FobTop
+Ka 0.20 0.20 0.20
+Kd 0.080 0.080 0.090
+Ks 0.50 0.50 0.50
+Ns 900.0
+Pm 0.50
+d 1.00
+illum 2
+
+newmtl BtnLock
+Ka 0.20 0.20 0.20
+Kd 0.700 0.720 0.750
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl BtnUnlock
+Ka 0.20 0.20 0.20
+Kd 0.700 0.720 0.750
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl BtnTrunk
+Ka 0.20 0.20 0.20
+Kd 0.700 0.720 0.750
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Chrome
+Ka 0.20 0.20 0.20
+Kd 0.850 0.870 0.900
+Ks 0.50 0.50 0.50
+Ns 900.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl Led
+Ka 0.20 0.20 0.20
+Kd 0.900 0.100 0.100
+Ks 0.50 0.50 0.50
+Ns 700.0
+Pm 0.00
+Ke 0.800 0.050 0.050
+d 1.00
+illum 2
+
+newmtl KeyHead
+Ka 0.20 0.20 0.20
+Kd 0.060 0.060 0.070
+Ks 0.50 0.50 0.50
+Ns 300.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Blade
+Ka 0.20 0.20 0.20
+Kd 0.750 0.770 0.800
+Ks 0.50 0.50 0.50
+Ns 800.0
+Pm 1.00
+d 1.00
+illum 2
+
+newmtl Tag
+Ka 0.20 0.20 0.20
+Kd 0.780 0.100 0.100
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl TagTxt
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 200.0
+Pm 0.00
+map_Kd Keytag.png
+d 1.00
+illum 2
+

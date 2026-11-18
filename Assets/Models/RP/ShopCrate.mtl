@@ -1,20 +1,57 @@
+newmtl Wood
+Ka 0.20 0.20 0.20
+Kd 1.000 1.000 1.000
+Ks 0.50 0.50 0.50
+Ns 60.0
+Pm 0.00
+map_Kd Crate_Wood.png
+d 1.00
+illum 2
+
 newmtl Post
 Ka 0.20 0.20 0.20
 Kd 1.000 1.000 1.000
 Ks 0.50 0.50 0.50
-Ns 250.0
+Ns 60.0
 Pm 0.00
-map_Kd Wood_Crate.png
+map_Kd Crate_Wood.png
 d 1.00
 illum 2
 
-newmtl Slat
+newmtl Label
 Ka 0.20 0.20 0.20
 Kd 1.000 1.000 1.000
 Ks 0.50 0.50 0.50
-Ns 220.0
+Ns 100.0
 Pm 0.00
-map_Kd Wood_Crate.png
+map_Kd Crate_Label.png
+d 1.00
+illum 2
+
+newmtl Orange
+Ka 0.20 0.20 0.20
+Kd 0.950 0.500 0.080
+Ks 0.50 0.50 0.50
+Ns 400.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Apple
+Ka 0.20 0.20 0.20
+Kd 0.750 0.100 0.080
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.00
+d 1.00
+illum 2
+
+newmtl Strap
+Ka 0.20 0.20 0.20
+Kd 0.400 0.420 0.450
+Ks 0.50 0.50 0.50
+Ns 500.0
+Pm 0.80
 d 1.00
 illum 2
 

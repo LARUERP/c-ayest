@@ -20,9 +20,9 @@ namespace FusionDarkRP.Integration
         public const string ModelId = "MoneyPrinter";
 
         private const float TickInterval = 0.5f;
-        private const float PrintEverySeconds = 20f;
-        private const long PrintCents = 2500L;          // 25 € toutes les 20 s
-        private const long CapacityCents = 100000L;     // bac plein : 1 000 €
+        private const float PrintEverySeconds = 30f;
+        private const long PrintCents = 1000L;          // 10 € toutes les 30 s (20 €/min)
+        private const long CapacityCents = 60000L;      // bac plein : 600 € (30 min)
         private const float ReachMeters = 1.15f;
         private const float HoldSeconds = 1.5f;
         private const float PoliceBonusRate = 0.20f;

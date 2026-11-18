@@ -257,6 +257,7 @@ namespace FusionDarkRP
                 AddInfo(factions, "Les Parisiens : recrutement obligatoire", Color.blue);
                 AddInfo(factions, "Les Gens du Voyage : recrutement obligatoire", Color.yellow);
                 AddInfo(factions, "Armurerie : recrutement obligatoire", Color.green);
+                AddInfo(factions, "Concession automobile : recrutement obligatoire", Color.cyan);
 
                 AddHierarchy(hierarchy, "Mairie", 3, Color.yellow);
                 AddHierarchy(hierarchy, "Police", 5, Color.blue);
@@ -268,6 +269,7 @@ namespace FusionDarkRP
                 AddHierarchy(hierarchy, "Parisiens", 8, Color.blue);
                 AddHierarchy(hierarchy, "Gens du Voyage", 9, Color.yellow);
                 AddHierarchy(hierarchy, "Armurerie", 10, Color.green);
+                AddHierarchy(hierarchy, "Concession automobile", 11, Color.cyan);
 
                 AddFunction(pageJoueursRacine, "Actualiser les joueurs",
                     Color.cyan, RefreshPlayers);
@@ -501,6 +503,7 @@ namespace FusionDarkRP
                     AddTargetTeam(management, target, 8, Color.blue, true);
                     AddTargetTeam(management, target, 9, Color.yellow, true);
                     AddTargetTeam(management, target, 10, Color.green, true);
+                    AddTargetTeam(management, target, 11, Color.cyan, true);
 
                     AddFunction(management, "Renvoyer citoyen", Color.white,
                         () => DarkRPNetwork.Request(target, 0, 0));
@@ -554,6 +557,8 @@ namespace FusionDarkRP
                     return Color.blue;
                 case 7:
                     return Color.red;
+                case 11:
+                    return Color.cyan;
                 default:
                     return Color.green;
             }

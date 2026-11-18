@@ -1,4 +1,4 @@
-# Audit final — Fusion DarkRP Ultimate 3.0.0
+# Audit — Fusion DarkRP Ultimate 5.7.0
 
 ## Statut
 **Non compilé, non testé en jeu** (aucun SDK .NET dans l'environnement de travail). Le code a été vérifié statiquement.
@@ -35,3 +35,9 @@ Dernière archive fournie : 2.2.0 (la 2.3.0 citée dans la mission n'était pas 
 4. Écran ATM : si le texte est encore inversé, remettre la rotation 180° dans `AtmPhysicalInteraction`.
 5. Mods concurrents à retirer de `Mods/` (voir README).
 6. Réseau multi-joueurs, arrivée tardive, sauvegardes, performances Quest.
+
+
+## Audit de cohérence 5.7.0
+Vérifié : toutes les actions de menu ont un gestionnaire hôte (et inversement) ; modèles/textures/catalogue cohérents (Tools/VerifyAssets.py : 55 modèles, 59 textures) ; noms d'API Marrow (Crate.Tags, Pallet.Title/Internal, Scannable.Redacted) lus dans Il2CppSLZ.Marrow.dll.
+Corrigé : voir CHANGELOG_EOS.md 5.7.0.
+Limites : non compilé, non testé en jeu ; reconnaissance des véhicules dépendante des tags/titres (voir spawnable-catalog.txt) ; véhicules non persistants entre sessions.

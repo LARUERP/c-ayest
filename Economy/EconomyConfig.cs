@@ -18,13 +18,19 @@ namespace FusionDarkRP.Economy
         public int SalaryIntervalMinutes { get; set; } = 15;
         public long DefaultSalaryCents { get; set; } = 25000;
 
+        /// <summary>
+        /// Migration unique : l'ancien salaire de citoyen (50 EUR) dépassait celui d'un éboueur
+        /// (35 EUR) ou d'un gang (15 EUR) ; il passe à 20 EUR (aide sans emploi).
+        /// </summary>
+        public bool CitizenPayAligned { get; set; }
+
         public List<JobSalary> JobSalaries { get; set; } =
             new List<JobSalary>
             {
                 new JobSalary
                 {
                     JobId = "citizen",
-                    AmountCents = 5000
+                    AmountCents = 2000
                 }
             };
     }
@@ -34,6 +40,8 @@ namespace FusionDarkRP.Economy
         private readonly object sync = new object();
         private readonly string filePath;
         private EconomyConfigData data;
+
+        private bool migratedOnLoad;
 
         private const long GradeBonusCents = 10000;
         private const int MaximumGradeIndex = 4;
@@ -57,6 +65,14 @@ namespace FusionDarkRP.Economy
                 "economy-config.json");
 
             Load();
+
+            if (migratedOnLoad)
+            {
+                lock (sync)
+                    SaveInternal();
+
+                migratedOnLoad = false;
+            }
         }
 
         public EconomyConfigData GetSnapshot()
@@ -349,6 +365,21 @@ namespace FusionDarkRP.Economy
 
             foreach (JobSalary salary in data.JobSalaries)
                 salary.JobId = salary.JobId.Trim();
+
+            if (!data.CitizenPayAligned)
+            {
+                foreach (JobSalary salary in data.JobSalaries)
+                {
+                    if (string.Equals(salary.JobId, "citizen", StringComparison.OrdinalIgnoreCase) &&
+                        salary.AmountCents == 5000)
+                    {
+                        salary.AmountCents = 2000;
+                    }
+                }
+
+                data.CitizenPayAligned = true;
+                migratedOnLoad = true;
+            }
         }
 
         private bool SaveInternal()
